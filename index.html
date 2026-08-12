@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-liff-id="">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
+<meta name="theme-color" content="#04141f">
+<title>2026 Meet Greater South 亞灣新創大南方 — 互動展區地圖</title>
+<meta name="description" content="2026 Meet Greater South 亞灣新創大南方互動式展區地圖。點擊展區看介紹與放大地圖,點擊舞台看每日節目表。8/28(五)–8/29(六)。">
+<meta property="og:title" content="2026 Meet Greater South 亞灣新創大南方 — 互動展區地圖">
+<meta property="og:description" content="點擊探索展區介紹、放大地圖與舞台節目表。">
+<meta property="og:type" content="website">
+<link rel="preload" as="image" href="assets/map-base.webp" fetchpriority="high">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-1: #04141f;
+    --bg-2: #06263a;
+    --bg-3: #073c52;
+    --ink: #f2fbff;
+    --ink-2: rgba(242,251,255,0.72);
+    --ink-3: rgba(242,251,255,0.5);
+    --glass: rgba(255,255,255,0.06);
+    --glass-strong: rgba(255,255,255,0.10);
+    --glass-border: rgba(255,255,255,0.14);
+    --accent: #00bfea;
+    --accent-2: #14cfa8;
+    --accent-3: #ffd24a;
+    --shadow-lg: 0 20px 60px rgba(0,0,0,0.5);
+    --spring: cubic-bezier(0.32, 0.72, 0, 1);
+    --ratio: 2.1363; /* 5046 / 2362 */
+  }
+
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Inter", sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 10% 6%, rgba(0,191,234,0.20), transparent 44%),
+      radial-gradient(circle at 90% 14%, rgba(20,207,168,0.16), transparent 48%),
+      linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 54%, var(--bg-3) 100%);
+    height: 100dvh;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ---------- Top brand bar ---------- */
+  .brand-bar {
+    flex: 0 0 auto; position: relative; z-index: 5;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 12px 18px; padding-top: max(12px, env(safe-area-inset-top));
+  }
+  .brand-mark { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .brand-mark .eyebrow {
+    font-size: 10px; letter-spacing: 2.5px; color: var(--ink-3);
+    font-weight: 600; text-transform: uppercase;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .brand-mark .title {
+    font-size: 16px; font-weight: 800;
+    background: linear-gradient(90deg, #fff 0%, #b9f0ff 50%, #9df0dd 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    letter-spacing: 0.4px;
+  }
+  .brand-actions { display: flex; gap: 8px; flex: 0 0 auto; }
+  .icon-btn {
+    appearance: none; border: 1px solid var(--glass-border);
+    background: var(--glass); color: var(--ink);
+    width: 38px; height: 38px; border-radius: 12px;
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 200ms var(--spring);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  }
+  .icon-btn:hover, .icon-btn:focus-visible { background: var(--glass-strong); transform: translateY(-1px); outline: none; }
+  .icon-btn svg { width: 18px; height: 18px; }
+
+  /* ---------- Hint pill ---------- */
+  .hint {
+    flex: 0 0 auto; position: relative; z-index: 2;
+    margin: 0 auto 4px; max-width: 1200px; width: 100%;
+    padding: 0 18px;
+    display: flex; align-items: center; gap: 9px;
+    font-size: 12px; color: var(--ink-2);
+  }
+  .hint .badge {
+    background: var(--glass); padding: 3px 10px; border-radius: 999px;
+    border: 1px solid var(--glass-border);
+    font-weight: 700; letter-spacing: 0.5px; color: var(--accent); flex: 0 0 auto;
+  }
+  .hint span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pulse-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto;
+    background: var(--accent); box-shadow: 0 0 12px var(--accent);
+    animation: dotPulse 1600ms ease-in-out infinite;
+  }
+  @keyframes dotPulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.45; transform: scale(0.75); } }
+
+  /* ---------- Map (fixed top pane) ---------- */
+  .map-stage { flex: 0 0 auto; position: relative; z-index: 1; width: 100%; padding: 4px 12px 8px; }
+  .map-row { width: 100%; max-width: min(1200px, calc(34vh * var(--ratio))); margin: 0 auto; }
+  .map-frame {
+    position: relative; width: 100%;
+    border-radius: 18px; overflow: hidden;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--glass-border);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 20px 50px rgba(0,0,0,0.45);
+    aspect-ratio: 5046 / 2362;
+  }
+  .map-base { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+  .map-overlay { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .hit {
+    fill: rgba(255,255,255,0.001);
+    stroke: rgba(255,255,255,0); stroke-width: 8;
+    cursor: pointer; pointer-events: all;
+    transition: fill 220ms ease, stroke 220ms ease, filter 240ms var(--spring);
+  }
+  .zone-group { outline: none; }
+  .zone-group:hover .hit, .zone-group:focus-visible .hit {
+    fill: color-mix(in srgb, var(--zc, var(--accent)) 24%, transparent);
+    stroke: var(--zc, var(--accent)); stroke-width: 10;
+    filter: drop-shadow(0 0 10px color-mix(in srgb, var(--zc) 70%, transparent));
+  }
+  /* clicked region lights up — no dimming mask over the rest */
+  .zone-group.active .hit {
+    fill: color-mix(in srgb, var(--zc) 36%, transparent);
+    stroke: var(--zc); stroke-width: 13;
+    filter: drop-shadow(0 0 14px var(--zc)) drop-shadow(0 0 26px color-mix(in srgb, var(--zc) 55%, transparent));
+  }
+  .map-overlay.intro .zone-group .hit { animation: introPulse 2400ms var(--spring) 1 both; }
+  @keyframes introPulse {
+    0%, 100% { fill: rgba(255,255,255,0.001); stroke: transparent; filter: none; }
+    22%, 50% { fill: color-mix(in srgb, var(--zc) 16%, transparent); stroke: var(--zc); stroke-width: 10; filter: drop-shadow(0 0 9px color-mix(in srgb, var(--zc) 60%, transparent)); }
+  }
+
+  /* ---------- Floating hover label ---------- */
+  .labels { position: absolute; inset: 0; pointer-events: none; }
+  .zlabel {
+    position: absolute; transform: translate(-50%, -50%) scale(0.92);
+    display: flex; align-items: center; gap: 7px;
+    padding: 5px 11px; border-radius: 999px;
+    background: rgba(4,20,31,0.88); color: var(--ink);
+    font-size: 12px; font-weight: 700; letter-spacing: 0.3px;
+    border: 1px solid var(--zc, var(--glass-border));
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5), 0 0 18px color-mix(in srgb, var(--zc) 45%, transparent);
+    white-space: nowrap; opacity: 0; transition: opacity 200ms var(--spring), transform 200ms var(--spring);
+  }
+  .zlabel.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  .zlabel .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--zc); box-shadow: 0 0 10px var(--zc); flex: 0 0 auto; }
+  .zlabel .go { font-size: 11px; color: var(--zc); font-weight: 800; }
+
+  /* ---------- Inline info panel (bottom) ---------- */
+  .panel {
+    flex: 1 1 auto; min-height: 0; position: relative; z-index: 2;
+    display: flex; flex-direction: column;
+    background: linear-gradient(180deg, rgba(7,44,62,0.6), rgba(4,20,31,0.2));
+    border-top: 1px solid var(--glass-border);
+  }
+  .panel-inner {
+    width: 100%; max-width: 760px; margin: 0 auto;
+    display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0;
+  }
+  .panel-head {
+    flex: 0 0 auto; display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 18px 10px; position: relative;
+  }
+  .sheet-accent { width: 5px; align-self: stretch; min-height: 42px; border-radius: 999px; background: var(--zc, var(--accent)); box-shadow: 0 0 16px var(--zc); flex: 0 0 auto; transition: background 300ms ease; }
+  .sheet-titles { flex: 1 1 auto; min-width: 0; }
+  .sheet-eyebrow { font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--zc, var(--accent)); transition: color 300ms ease; }
+  .sheet-title { font-size: 21px; font-weight: 800; line-height: 1.18; margin-top: 2px; }
+  .sheet-title-en { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+
+  .panel-body { flex: 1 1 auto; min-height: 0; overflow: hidden; padding: 2px 0 10px; display: flex; flex-direction: column; }
+
+  /* slide-up-in animation on content change */
+  @keyframes slideUpIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .panel-body.playing .anim { animation: slideUpIn 460ms var(--spring) both; }
+  .panel-body.playing .anim:nth-child(1) { animation-delay: 20ms; }
+  .panel-body.playing .anim:nth-child(2) { animation-delay: 80ms; }
+  .panel-body.playing .anim:nth-child(3) { animation-delay: 140ms; }
+  .panel-body.playing .anim:nth-child(4) { animation-delay: 200ms; }
+
+  /* zone view */
+  .sheet-blurb { font-size: 14px; color: var(--ink-2); margin-bottom: 16px; }
+  .section-label { font-size: 11px; font-weight: 800; letter-spacing: 1.5px; color: var(--ink-3); text-transform: uppercase; margin-bottom: 10px; }
+  .highlights { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .hl { display: flex; align-items: center; gap: 8px; padding: 11px 13px; border-radius: 13px; background: var(--glass); border: 1px solid var(--glass-border); font-size: 13px; font-weight: 600; }
+  .hl .hl-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--zc, var(--accent)); box-shadow: 0 0 8px var(--zc); flex: 0 0 auto; }
+
+  /* stage / schedule view */
+  .day-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+  .day-tab {
+    flex: 1 1 0; appearance: none; cursor: pointer; padding: 9px 6px; border-radius: 13px;
+    background: var(--glass); border: 1px solid var(--glass-border); color: var(--ink-2);
+    font-size: 13px; font-weight: 700; line-height: 1.25;
+    display: flex; flex-direction: column; align-items: center; gap: 1px;
+    transition: all 180ms var(--spring);
+  }
+  .day-tab .dow { font-size: 10px; font-weight: 600; color: var(--ink-3); }
+  .day-tab:hover { background: var(--glass-strong); }
+  .day-tab.active { background: color-mix(in srgb, var(--zc) 22%, transparent); border-color: var(--zc); color: #fff; box-shadow: 0 0 16px color-mix(in srgb, var(--zc) 40%, transparent); }
+  .day-tab.active .dow { color: rgba(255,255,255,0.85); }
+  .schedule { display: flex; flex-direction: column; gap: 9px; }
+  .sch-item { display: flex; gap: 12px; align-items: flex-start; padding: 13px 14px; border-radius: 14px; background: var(--glass); border: 1px solid var(--glass-border); }
+  .sch-time { flex: 0 0 auto; font-size: 12px; font-weight: 800; color: var(--zc, var(--accent)); font-variant-numeric: tabular-nums; white-space: nowrap; padding-top: 1px; min-width: 84px; }
+  .sch-main { flex: 1 1 auto; min-width: 0; }
+  .sch-title { font-size: 14px; font-weight: 700; line-height: 1.4; }
+  .sch-sub { font-size: 12px; color: var(--ink-3); margin-top: 3px; line-height: 1.4; }
+  .lang { display: inline-block; vertical-align: 2px; margin-left: 6px; font-size: 9px; font-weight: 800; letter-spacing: 0.5px; padding: 1px 5px; border-radius: 4px; line-height: 1.5; }
+  .lang.zh { background: rgba(255,255,255,0.16); color: var(--ink); }
+  .lang.en { background: #e8283f; color: #fff; }
+  .sch-empty { padding: 26px 14px; text-align: center; color: var(--ink-3); font-size: 13px; }
+
+  /* ">>" swipe hint next to the title */
+  .sheet-title-row { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+  .zone-more {
+    appearance: none; cursor: pointer; flex: 0 0 auto;
+    border: 1px solid var(--zc); color: var(--zc);
+    background: color-mix(in srgb, var(--zc) 20%, transparent);
+    font-weight: 900; font-size: 15px; line-height: 1; letter-spacing: -1px;
+    padding: 4px 11px; border-radius: 999px;
+    animation: morePulse 1400ms ease-in-out infinite;
+  }
+  /* hidden via visibility so the title row never reflows mid-scroll */
+  .zone-more.off { visibility: hidden; animation: none; }
+  @keyframes morePulse { 0%,100% { transform: translateX(0); opacity: 1; } 50% { transform: translateX(4px); opacity: 0.55; } }
+
+  /* ---------- 2-page carousel (info + zoomed map) ---------- */
+  .carousel { flex: 1 1 auto; min-height: 0; display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .carousel::-webkit-scrollbar { display: none; }
+  .slide { flex: 0 0 100%; scroll-snap-align: center; min-width: 0; height: 100%; }
+  .slide.info-slide { overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 2px 18px 6px; }
+  .slide.map-slide { display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 2px 14px 6px; }
+  .slide-img-wrap { width: 100%; display: flex; align-items: flex-start; justify-content: center; }
+  .slide.map-slide img { width: 100%; height: auto; object-fit: contain; border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.5); display: block; }
+  .carousel-dots { flex: 0 0 auto; display: flex; gap: 8px; justify-content: center; align-items: center; padding: 10px 0 4px; }
+  .cdot { position: relative; width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.25); cursor: pointer; transition: all 200ms var(--spring); border: none; padding: 0; }
+  .cdot::after { content: ''; position: absolute; inset: -14px; } /* larger tap target */
+  .cdot.active { background: var(--zc, var(--accent)); width: 22px; border-radius: 999px; }
+
+  body[data-mode="stage"] #zoneView { display: none; }
+  body[data-mode="zone"]  #stageView { display: none; }
+
+  /* ---------- Legend modal ---------- */
+  .legend { position: fixed; inset: 0; background: rgba(2,10,16,0.72); display: none; align-items: center; justify-content: center; z-index: 90; padding: 24px; backdrop-filter: blur(8px); }
+  .legend[data-open="true"] { display: flex; }
+  .legend-card { width: 100%; max-width: 460px; background: linear-gradient(180deg, rgba(6,38,58,0.98), rgba(4,20,31,0.99)); border: 1px solid var(--glass-border); border-radius: 20px; padding: 22px; box-shadow: var(--shadow-lg); max-height: 84vh; overflow-y: auto; animation: legendIn 320ms var(--spring); }
+  @keyframes legendIn { from { transform: translateY(16px) scale(0.98); opacity: 0; } to { transform: none; opacity: 1; } }
+  .legend-card h2 { font-size: 17px; font-weight: 800; margin-bottom: 4px; }
+  .legend-card .sub { color: var(--ink-2); font-size: 12px; margin-bottom: 14px; }
+  .legend-group-label { font-size: 11px; font-weight: 800; letter-spacing: 1.5px; color: var(--ink-3); text-transform: uppercase; margin: 14px 4px 6px; }
+  .legend-group-label:first-child { margin-top: 4px; }
+  .legend-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; cursor: pointer; border: 1px solid transparent; transition: background 160ms ease, border-color 160ms ease, transform 160ms var(--spring); }
+  .legend-item:hover, .legend-item:focus-visible { background: var(--glass); border-color: var(--zc, var(--glass-border)); outline: none; transform: translateX(2px); }
+  .legend-swatch { width: 16px; height: 16px; border-radius: 5px; flex: 0 0 auto; box-shadow: 0 0 12px currentColor; }
+  .legend-name { font-weight: 700; font-size: 14px; }
+  .legend-desc { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+  .legend-tag { margin-left: auto; font-size: 10px; font-weight: 800; color: var(--zc); flex: 0 0 auto; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--zc); white-space: nowrap; }
+  .btn { appearance: none; cursor: pointer; padding: 13px 16px; border-radius: 14px; font-size: 14px; font-weight: 800; letter-spacing: 0.3px; border: 1px solid var(--glass-border); transition: transform 160ms var(--spring), background 160ms ease; }
+  .btn:active { transform: scale(0.98); }
+  .btn-ghost { background: var(--glass); color: var(--ink); }
+  .btn-ghost:hover { background: var(--glass-strong); }
+
+  /* ---------- Toast ---------- */
+  .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translate(-50%, 20px); z-index: 120; background: rgba(4,20,31,0.94); border: 1px solid var(--glass-border); color: var(--ink); padding: 11px 18px; border-radius: 999px; font-size: 13px; font-weight: 600; box-shadow: var(--shadow-lg); backdrop-filter: blur(10px); opacity: 0; pointer-events: none; transition: opacity 260ms var(--spring), transform 260ms var(--spring); }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* ---------- Calibration overlay ---------- */
+  .cal-grid line { stroke: rgba(0,255,255,0.25); stroke-width: 2; }
+  .cal-grid line.major { stroke: rgba(255,80,80,0.45); }
+  .cal-grid text { fill: #ffeb3b; font-size: 34px; }
+
+  @media (min-width: 900px) {
+    .brand-mark .title { font-size: 18px; }
+    .map-row { max-width: min(1200px, calc(42vh * var(--ratio))); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .panel-body.playing .anim { animation-duration: 1ms !important; }
+    *, *::before, *::after { animation-duration: 0.001ms !important; }
+  }
+</style>
+</head>
+<body data-mode="stage">
+
+<header class="brand-bar">
+  <div class="brand-mark">
+    <span class="eyebrow">MEET GREATER SOUTH · 亞灣新創大南方 · 8/28–8/29</span>
+    <span class="title">2026 互動展區地圖</span>
+  </div>
+  <nav class="brand-actions" aria-label="工具">
+    <button class="icon-btn" id="btnLegend" aria-label="開啟展區與舞台總覽">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>
+    </button>
+    <button class="icon-btn" id="btnShare" aria-label="分享地圖">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+    </button>
+  </nav>
+</header>
+
+<div class="hint" aria-hidden="true">
+  <span class="badge">點擊探索</span>
+  <span class="pulse-dot"></span>
+  <span>點展區看介紹,點舞台看節目表,右滑看放大地圖</span>
+</div>
+
+<main class="map-stage">
+  <div class="map-row">
+    <div class="map-frame" id="mapFrame" role="region" aria-label="2026 Meet Greater South 亞灣新創大南方互動式展區地圖">
+      <picture>
+        <source srcset="assets/map-base.webp" type="image/webp">
+        <img class="map-base" src="assets/map-base.jpg" alt="2026 Meet Greater South 亞灣新創大南方大會地圖"
+             loading="eager" fetchpriority="high" decoding="sync" draggable="false">
+      </picture>
+      <svg class="map-overlay" id="overlay" viewBox="0 0 5046 2362" preserveAspectRatio="none" aria-label="可點擊的展區與舞台"></svg>
+      <div class="labels" id="labels" aria-hidden="true"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Inline info panel -->
+<section class="panel" id="panel" aria-live="polite">
+  <div class="panel-inner">
+    <div class="panel-head">
+      <div class="sheet-accent"></div>
+      <div class="sheet-titles">
+        <div class="sheet-eyebrow" id="sheetEyebrow">STAGE</div>
+        <div class="sheet-title-row">
+          <span class="sheet-title" id="sheetTitle">—</span>
+          <button class="zone-more" id="zoneMore" aria-label="右滑查看放大地圖">&raquo;</button>
+        </div>
+        <div class="sheet-title-en" id="sheetTitleEn">—</div>
+      </div>
+    </div>
+    <div class="panel-body" id="panelBody">
+      <div class="carousel" id="carousel">
+        <div class="slide info-slide">
+          <!-- STAGE: schedule -->
+          <div id="stageView">
+            <div class="day-tabs anim" id="dayTabs"></div>
+            <div class="schedule anim" id="scheduleList"></div>
+          </div>
+          <!-- ZONE: intro -->
+          <div id="zoneView">
+            <p class="sheet-blurb anim" id="sheetBlurb">—</p>
+            <div class="section-label anim">展區資訊</div>
+            <div class="highlights anim" id="sheetHighlights"></div>
+          </div>
+        </div>
+        <div class="slide map-slide">
+          <div class="slide-img-wrap"><img id="zoneMapImg" alt="放大地圖" draggable="false"></div>
+        </div>
+      </div>
+      <div class="carousel-dots" id="carouselDots"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Legend modal -->
+<div class="legend" id="legend" role="dialog" aria-modal="true" aria-labelledby="legendTitle">
+  <div class="legend-card" role="document">
+    <h2 id="legendTitle">展區與舞台總覽</h2>
+    <p class="sub">點選任一項目,即可在下方開啟介紹或節目表。</p>
+    <div id="legendList"></div>
+    <button class="btn btn-ghost" id="legendClose" style="margin-top:14px; width:100%;">關閉</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- LIFF SDK: only effective inside LINE / LIFF environment -->
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js" defer></script>
+
+<script>
+(() => {
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const VB = { w: 5046, h: 2362 };
+  const DAYS = [ { key:'08/28', dow:'五' }, { key:'08/29', dow:'六' } ];
+
+  // ---------- Stages & activity spaces (clickable → schedule) ----------
+  const STAGES = [
+    { key:'sunrise', name:'日光舞台', nameEn:'Sunrise Stage', color:'#E6298F',
+      label:{x:1550,y:462}, polys:['1168,108 1932,108 1932,816 1168,816'] },
+    { key:'fever', name:'狂熱舞台', nameEn:'Fever Stage', color:'#F5B417',
+      label:{x:4416,y:416}, polys:['4160,212 4672,212 4672,620 4160,620'] },
+    { key:'cocreation', name:'共創空間', nameEn:'Co-creation Space', color:'#1E6FD9',
+      label:{x:458,y:1730}, polys:['236,1536 680,1536 680,1924 236,1924'] },
+    { key:'match2', name:'企業媒合空間', nameEn:'Matchmaking Area2', color:'#66C6E8',
+      label:{x:3294,y:266}, polys:['3012,114 3576,114 3576,417 3012,417'] },
+    { key:'match1', name:'投資媒合空間', nameEn:'Matchmaking Area1', color:'#3FBFB4',
+      label:{x:3748,y:266}, polys:['3592,112 3904,112 3904,420 3592,420'] }
+  ];
+
+  // ---------- Exhibition zones (clickable → intro + zoomed map) ----------
+  const CXC = '#5FBBDA', EPC = '#7FCCE4';
+  const ZONES = [
+    { key:'cx-01', code:'CX-01', name:'經濟部產業發展署主題館', nameEn:"IDA's Pavilion", color:CXC,
+      blurb:'經濟部產業發展署主題館,位於展場南側的長型主題館,鄰近 N2 出口,與 CX-02 分列大會報到站兩側。',
+      highlights:['經濟部產業發展署','展場南側長型主題館','鄰近 N2 出口','大會報到站西側'],
+      label:{x:1808,y:1706}, polys:['832,1536 2784,1536 2784,1876 832,1876'] },
+    { key:'cx-02', code:'CX-02', name:'經濟部產業技術司主題專區', nameEn:"DoIT's Pavilion", color:CXC,
+      blurb:'經濟部產業技術司主題專區,位於展場南側的長型專區,鄰近 N1 入口,是入場後最先經過的主題專區。',
+      highlights:['經濟部產業技術司','展場南側長型專區','鄰近 N1 入口','大會報到站東側'],
+      label:{x:3896,y:1706}, polys:['3012,1536 4780,1536 4780,1876 3012,1876'] },
+    { key:'cx-03', code:'CX-03', name:'文化內容策進院主題專區', nameEn:'TAICCA Pavilion', color:CXC,
+      blurb:'文化內容策進院(TAICCA)主題專區,鄰近借問站與大會地圖看板;8/29 於共創空間另有「展商解方發表會 X 文策院專場」。',
+      highlights:['文化內容策進院 TAICCA','借問站・大會地圖旁','共創空間有文策院專場','鄰近南臺灣科研平台'],
+      label:{x:3188,y:1000}, polys:['3008,824 3368,824 3368,1176 3008,1176'] },
+    { key:'cx-04', code:'CX-04', name:'櫃買中心創櫃新星主題專區', nameEn:'Taipei Exchange & Startup Pavilion', color:CXC,
+      blurb:'櫃買中心創櫃新星主題專區,位於企業媒合空間正下方,與生態系夥伴、淨零碳排與綠能永續專區為鄰。',
+      highlights:['櫃買中心創櫃新星','企業媒合空間正下方','鄰近生態系夥伴 P','鄰近淨零碳排 G'],
+      label:{x:3168,y:584}, polys:['3008,492 3328,492 3328,676 3008,676'] },
+    { key:'cx-05', code:'CX-05', name:'經濟部中小及新創企業署主題館', nameEn:'Small and Medium Enterprise and Startup Administration, Ministry of Economic Affairs Pavilion', color:CXC,
+      blurb:'經濟部中小及新創企業署主題館,位於展場中央上方、Meet 柑仔店旁的大型主題館,與日光舞台隔著主通道相望。',
+      highlights:['經濟部中小及新創企業署','展場中央上方大型館','Meet 柑仔店旁','鄰近日光舞台'],
+      label:{x:2434,y:440}, polys:['2084,284 2784,284 2784,596 2084,596'] },
+    { key:'cx-06', code:'CX-06', name:'高雄市政府主題專區', nameEn:'Kaohsiung City Government Pavilion', color:CXC,
+      blurb:'高雄市政府主題專區,位於展場正中央的大型專區,西側緊鄰醫療健康與高齡照護解方專區。',
+      highlights:['高雄市政府','展場正中央大型專區','醫療健康專區東側','鄰近 CX-05'],
+      label:{x:2434,y:1094}, polys:['2084,800 2784,800 2784,1388 2084,1388'] },
+    { key:'cx-07', code:'CX-07', name:'TTA臺灣科技新創基地', nameEn:'TAIWAN TECH ARENA Pavilion', color:CXC,
+      blurb:'TTA 臺灣科技新創基地展區,與中華電信 5G 加速器專區、CCIA x CCBI 跨境創新專館連成一排加速器聚落。',
+      highlights:['TAIWAN TECH ARENA','加速器聚落一字排開','鄰近 EP-02 中華電信5G','鄰近 EP-01 CCIA x CCBI'],
+      label:{x:1066,y:1154}, polys:['832,980 1300,980 1300,1328 832,1328'] },
+    { key:'cx-08', code:'CX-08', name:'中華民國全國中小企業總會', nameEn:'National Association of Small and Medium Enterprises R.O.C.', color:CXC,
+      blurb:'中華民國全國中小企業總會展位,位於南臺灣科研產業化平台與淨零碳排專區之間的展場東側。',
+      highlights:['全國中小企業總會','SIG 與 G 專區之間','鄰近未來零售與餐飲科技','展場東側'],
+      label:{x:3891,y:793}, polys:['3801,698 3981,698 3981,888 3801,888'] },
+    { key:'ep-01', code:'EP-01', name:'CCIA x CCBI 跨境創新專館', nameEn:'CCIA x CCBI Cross-border Innovation Hub', color:EPC,
+      blurb:'CCIA x CCBI 跨境創新專館,聚焦跨境創新交流,位於 TTA 臺灣科技新創基地與中華電信 5G 加速器專區旁。',
+      highlights:['CCIA x CCBI','跨境創新專館','TTA 加速器聚落','鄰近醫療健康專區'],
+      label:{x:1712,y:1154}, polys:['1622,980 1802,980 1802,1328 1622,1328'] },
+    { key:'ep-02', code:'EP-02', name:'中華電信5G加速器專區', nameEn:'Chunghwa Telecom 5G Accelerator Pavilion', color:EPC,
+      blurb:'中華電信 5G 加速器專區,位於 TTA 臺灣科技新創基地與 CCIA x CCBI 跨境創新專館之間。',
+      highlights:['中華電信','5G 加速器專區','TTA 加速器聚落','鄰近 CCIA x CCBI'],
+      label:{x:1468,y:1154}, polys:['1352,980 1584,980 1584,1328 1352,1328'] },
+    { key:'ep-03', code:'EP-03', name:'極智移動', nameEn:'Lean Mobility', color:EPC,
+      blurb:'極智移動(Lean Mobility)專區,位於日光舞台西側、用餐休息區下方。',
+      highlights:['Lean Mobility','極智移動','日光舞台西側','鄰近用餐休息區'],
+      label:{x:1048,y:642}, polys:['952,472 1144,472 1144,812 952,812'] },
+    { key:'gp', code:'GP', name:'國際館', nameEn:'Global Pavilion', color:'#A85DA3',
+      blurb:'國際館 Global Pavilion,匯集海外參展團隊,區內設有國際服務台(International Services Counter),攤位編號 GP 3-01 ~ GP 3-31。',
+      highlights:['海外參展團隊','國際服務台','GP 3-01 ~ 3-31','鄰近充電站'],
+      label:{x:465,y:1183}, polys:['269,913 661,913 661,1453 269,1453'] },
+    { key:'h', code:'H', name:'醫療健康與高齡照護', nameEn:'Healthcare & Senior Care Solutions', color:'#3BB1B1',
+      blurb:'醫療健康與高齡照護解方專區,位於高雄市政府主題專區西側,攤位編號 H2-1、H 3-01 ~ H 3-14。',
+      highlights:['醫療健康與高齡照護','H2-1','H 3-01 ~ 3-14','高雄市政府專區西側'],
+      label:{x:1922,y:1152}, polys:['1832,915 2012,915 2012,1390 1832,1390'] },
+    { key:'t', code:'T', name:'風土餐桌市集 feat.米濃聚落', nameEn:'Tasty feat. MI NUNG Village', color:'#9C7A56',
+      blurb:'風土餐桌市集 feat. 米濃聚落,集結在地餐飲與物產,旁邊即為用餐休息區,攤位編號 T2-1、T3-1 ~ T3-19。',
+      highlights:['風土餐桌市集','T2-1 米濃聚落','T3-1 ~ T3-19','鄰近用餐休息區'],
+      label:{x:420,y:470}, polys:['228,288 616,288 616,793 228,793','56,343 236,343 236,1228 56,1228'] },
+    { key:'sig', code:'SIG', name:'南臺灣科研產業化平台', nameEn:'Southern Taiwan Gloria', color:'#3DB76D',
+      blurb:'南臺灣科研產業化平台(Southern Taiwan Gloria),位於展場東側、文策院主題專區旁,攤位編號 SIG 2-01、SIG 3-01 ~ SIG 3-16。',
+      highlights:['南臺灣科研產業化平台','SIG 2-01','SIG 3-01 ~ 3-16','鄰近 CX-03 文策院'],
+      label:{x:3601,y:976}, polys:['3438,803 3764,803 3764,1148 3438,1148'] },
+    { key:'e', code:'E', name:'數位管理與企業效率', nameEn:'Enterprise Efficiency Solutions', color:'#EC1E8C',
+      blurb:'數位管理與企業效率解方專區,橫跨展場東側整條通道,攤位編號 E1-1、E 2-1 ~ E 2-3、E 3-01 ~ E 3-33,是本次攤位數最多的解方專區。',
+      highlights:['數位管理與企業效率','E1-1 梭易科海洋應用方案','E 2-1 ~ 2-3','E 3-01 ~ 3-33'],
+      label:{x:3768,y:1302}, polys:['2998,1212 4539,1212 4539,1392 2998,1392'] },
+    { key:'f', code:'F', name:'未來零售與餐飲科技', nameEn:'Retail & Food Service Solutions', color:'#1B63C4',
+      blurb:'未來零售與餐飲科技解方專區,位於南臺灣科研產業化平台與智慧製造專區之間,攤位編號 F 2-01、F 3-01 ~ F 3-04。',
+      highlights:['未來零售與餐飲科技','F 2-01','F 3-01 ~ 3-04','鄰近智慧製造專區'],
+      label:{x:3890,y:1043}, polys:['3800,953 3980,953 3980,1133 3800,1133'] },
+    { key:'s', code:'S', name:'智慧製造與產線升級', nameEn:'Smart Manufacturing Solutions', color:'#78C172',
+      blurb:'智慧製造與產線升級解方專區,位於展場東側,攤位編號 S 3-01 ~ S 3-10。',
+      highlights:['智慧製造與產線升級','S 3-01 ~ 3-10','鄰近未來零售專區','鄰近品牌轉型專區'],
+      label:{x:4086,y:988}, polys:['3996,834 4176,834 4176,1143 3996,1143'] },
+    { key:'m', code:'M', name:'品牌轉型與跨境行銷', nameEn:'Cross-Border Marketing Solutions', color:'#F5C21F',
+      blurb:'品牌轉型與跨境行銷解方專區,位於展場東側、大會倉庫旁,攤位編號 M1-1、M1-2、M 2-01、M 3-01 ~ M 3-11。',
+      highlights:['M1-1 正美集團 Cymmetrik','M1-2 ACCUPASS 活動通','M 2-01','M 3-01 ~ 3-11'],
+      label:{x:4400,y:974}, polys:['4218,797 4583,797 4583,1152 4218,1152'] },
+    { key:'g', code:'G', name:'淨零碳排與綠能永續', nameEn:'Net Zero & Green Energy Solutions', color:'#B9D958',
+      blurb:'淨零碳排與綠能永續解方專區,位於狂熱舞台西側、生態系夥伴專區旁,攤位編號 G 3-01 ~ G 3-11。',
+      highlights:['淨零碳排與綠能永續','G 3-01 ~ 3-11','狂熱舞台西側','鄰近生態系夥伴'],
+      label:{x:3871,y:559}, polys:['3694,469 4048,469 4048,649 3694,649'] },
+    { key:'p', code:'P', name:'生態系夥伴', nameEn:'Ecosystem Partners', color:'#F0862F',
+      blurb:'生態系夥伴專區,集結加速器、創投與共享空間等新創支持單位,位於櫃買中心創櫃新星主題專區旁,攤位編號 P 1-01 ~ P 1-04。',
+      highlights:['P1-1 酷日國際 Crew Taiwan','P1-2 臺中軟體園區加速器','P1-3 中華民國創業投資同業公會','P1-4 造夢基地共享空間'],
+      label:{x:3509,y:578}, polys:['3419,488 3599,488 3599,668 3419,668'] }
+  ];
+
+  // ---------- Schedule data (transcribed from /schedule/活動總表.jpg) ----------
+  const ZH = ['中文'], EN = ['EN'], BOTH = ['中文', 'EN'];
+  const SCHEDULE = {
+    sunrise: {
+      '08/28': [
+        { t:'09:45–10:20', title:'亞灣新創大南方開幕式', sub:'Meet Greater South Opening Ceremony', lang:ZH },
+        { t:'14:00–17:00', title:'大南方產業轉型實戰論壇', sub:'Industrial Transformation in Action Forum', lang:ZH }
+      ],
+      '08/29': [
+        { t:'14:00–17:00', title:'餐飲創業沙龍——破框:「餐」與新未來', sub:'F&B Entrepreneurship Salon｜Breaking the Mold: Shaping the Future of Food', lang:ZH }
+      ]
+    },
+    fever: {
+      '08/28': [
+        { t:'10:00–12:30', title:'AI零售・智慧無限 - 2026台智雲AI超算加速器相遇大南方DEMO DAY', sub:'Intelligent Retail:2026 TWAI AIHPC Accelerator Meet Greater South Demo Day', lang:ZH },
+        { t:'13:00–17:00', title:'產創NEXT解鎖新未來', sub:'TIIP Next Unlocking the Future', lang:ZH }
+      ],
+      '08/29': [
+        { t:'10:20–16:00', title:'2026 G CAMP高雄場 FINAL PITCH決賽', sub:'2026 G Camp KaoHsiung Session Final Pitch Contest', lang:EN }
+      ]
+    },
+    cocreation: {
+      '08/28': [
+        { t:'11:00–12:30', title:'國際展商解方發表會', sub:'Global Solution Showcase', lang:EN },
+        { t:'13:30–17:00', title:'2026年AI決策領導力課程', sub:'2026 AI Decision Leadership Workshop', lang:ZH }
+      ],
+      '08/29': [
+        { t:'10:00–12:30', title:'展商解方發表會', sub:'Exhibitor Solution Showcase', lang:ZH },
+        { t:'13:30–15:00', title:'展商解方發表會 X 文策院專場', sub:'Exhibitor Solution Showcase X TAICCA', lang:ZH }
+      ]
+    },
+    match2: {
+      '08/28': [
+        { t:'10:30–12:00', title:'轉型沙龍企業午餐會', sub:'Business Matchmaking Luncheon', lang:ZH },
+        { t:'13:30–16:30', title:'轉型沙龍企業媒合會', sub:'Business Matchmaking', lang:ZH },
+        { t:'16:30–17:40', title:'YOURATOR人資小酒館#24:AI時代下的人資長解方', sub:"Yourator HR Bistro #24: The CHRO's Playbook for the AI Era", lang:ZH }
+      ],
+      '08/29': [
+        { t:'10:30–12:00', title:'轉型沙龍企業媒合會', sub:'Business Matchmaking', lang:ZH }
+      ]
+    },
+    match1: {
+      '08/28': [
+        { t:'10:30–12:00', title:'新創與投資人媒合會', sub:'Investor Matchmaking', lang:BOTH },
+        { t:'13:30–17:00', title:'新創與投資人媒合會', sub:'Investor Matchmaking', lang:BOTH }
+      ],
+      '08/29': [
+        { t:'10:30–12:00', title:'新創與投資人媒合會', sub:'Investor Matchmaking', lang:BOTH },
+        { t:'13:30–17:00', title:'新創與投資人媒合會', sub:'Investor Matchmaking', lang:BOTH }
+      ]
+    }
+  };
+
+  const ALL = {};
+  STAGES.forEach(s => { s.type = 'stage'; ALL[s.key] = s; });
+  ZONES.forEach(z => { z.type = 'zone'; ALL[z.key] = z; });
+
+  const $ = s => document.querySelector(s);
+  const overlay = $('#overlay'), labelsEl = $('#labels'), mapFrame = $('#mapFrame');
+  const panelBody = $('#panelBody');
+  const sheetEyebrow = $('#sheetEyebrow'), sheetTitle = $('#sheetTitle'), sheetTitleEn = $('#sheetTitleEn');
+  const sheetBlurb = $('#sheetBlurb'), sheetHighlights = $('#sheetHighlights');
+  const dayTabs = $('#dayTabs'), scheduleList = $('#scheduleList');
+  const carousel = $('#carousel'), carouselDots = $('#carouselDots'), zoneMapImg = $('#zoneMapImg'), zoneMore = $('#zoneMore');
+  const legend = $('#legend'), legendList = $('#legendList'), toastEl = $('#toast');
+
+  let current = null, currentDay = DAYS[0].key;
+  const groups = {}, zlabels = {};
+
+  // ---------- Build hotspot groups + hover labels ----------
+  function buildSpot(z) {
+    const g = document.createElementNS(SVGNS, 'g');
+    g.setAttribute('class', 'zone-group');
+    g.dataset.zone = z.key; g.setAttribute('tabindex', '0'); g.setAttribute('role', 'button');
+    g.setAttribute('aria-label', `${z.name} ${z.nameEn},${z.type === 'stage' ? '查看節目表' : '查看展區介紹'}`);
+    g.style.setProperty('--zc', z.color);
+    z.polys.forEach(pts => { const p = document.createElementNS(SVGNS, 'polygon'); p.setAttribute('class', 'hit'); p.setAttribute('points', pts); g.appendChild(p); });
+    overlay.appendChild(g); groups[z.key] = g;
+
+    const lab = document.createElement('div');
+    lab.className = 'zlabel'; lab.style.setProperty('--zc', z.color);
+    lab.style.left = (z.label.x / VB.w * 100) + '%'; lab.style.top = (z.label.y / VB.h * 100) + '%';
+    lab.innerHTML = `<span class="dot"></span>${z.code ? z.code + ' ' : ''}${z.name}<span class="go">${z.type === 'stage' ? '節目表 ›' : '介紹 ›'}</span>`;
+    labelsEl.appendChild(lab); zlabels[z.key] = lab;
+
+    const enter = () => { if (current !== z.key) zlabels[z.key].classList.add('show'); };
+    const leave = () => zlabels[z.key].classList.remove('show');
+    g.addEventListener('pointerenter', enter); g.addEventListener('pointerleave', leave);
+    g.addEventListener('focus', enter); g.addEventListener('blur', leave);
+  }
+  STAGES.forEach(buildSpot); ZONES.forEach(buildSpot);
+
+  // ---------- Legend ----------
+  function buildLegendGroup(label, list) {
+    const gl = document.createElement('div'); gl.className = 'legend-group-label'; gl.textContent = label; legendList.appendChild(gl);
+    list.forEach(z => {
+      const item = document.createElement('div');
+      item.className = 'legend-item'; item.tabIndex = 0; item.setAttribute('role', 'button'); item.style.setProperty('--zc', z.color);
+      item.innerHTML = `<span class="legend-swatch" style="background:${z.color}; color:${z.color};"></span>` +
+        `<div><div class="legend-name">${z.code ? z.code + '｜' : ''}${z.name}</div><div class="legend-desc">${z.nameEn}</div></div>` +
+        (z.type === 'stage' ? '<span class="legend-tag">節目表</span>' : '');
+      const open = () => { legend.dataset.open = 'false'; openSpot(z.key); };
+      item.addEventListener('click', open);
+      item.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+      legendList.appendChild(item);
+    });
+  }
+  const pick = keys => keys.map(k => ALL[k]);
+  buildLegendGroup('舞台與活動空間 · 節目表', STAGES);
+  buildLegendGroup('產業主題專區 Industry Theme EXPO', pick(['cx-01','cx-02','cx-03','cx-04','cx-05','cx-06','cx-07','cx-08','ep-01','ep-02','ep-03']));
+  buildLegendGroup('主題解方專區 Solutions', pick(['h','g','p','sig','e','f','s','m']));
+  buildLegendGroup('特色專區 Featured', pick(['t','gp']));
+
+  // ---------- Content rendering ----------
+  function playAnim() { panelBody.classList.remove('playing'); void panelBody.offsetWidth; panelBody.classList.add('playing'); }
+  const langTags = arr => (arr || []).map(l => `<span class="lang ${l === 'EN' ? 'en' : 'zh'}">${l}</span>`).join('');
+
+  function renderDayTabs(z) {
+    dayTabs.innerHTML = '';
+    DAYS.forEach(d => {
+      const b = document.createElement('button');
+      b.className = 'day-tab' + (d.key === currentDay ? ' active' : ''); b.dataset.day = d.key;
+      b.innerHTML = `${d.key}<span class="dow">星期${d.dow}</span>`;
+      b.addEventListener('click', () => { currentDay = d.key; renderSchedule(z); refreshTabs(); });
+      dayTabs.appendChild(b);
+    });
+  }
+  function refreshTabs() { dayTabs.querySelectorAll('.day-tab').forEach(b => b.classList.toggle('active', b.dataset.day === currentDay)); }
+  function renderSchedule(z) {
+    const items = (SCHEDULE[z.key] && SCHEDULE[z.key][currentDay]) || [];
+    scheduleList.innerHTML = '';
+    if (!items.length) { scheduleList.innerHTML = '<div class="sch-empty">本日於此舞台無安排場次</div>'; return; }
+    items.forEach(it => {
+      const el = document.createElement('div'); el.className = 'sch-item';
+      el.innerHTML = `<div class="sch-time">${it.t}</div><div class="sch-main">` +
+        `<div class="sch-title">${it.title}${langTags(it.lang)}</div>` +
+        `${it.sub ? `<div class="sch-sub">${it.sub}</div>` : ''}</div>`;
+      scheduleList.appendChild(el);
+    });
+  }
+  function firstDayWithSessions(key) { const f = DAYS.find(d => SCHEDULE[key] && SCHEDULE[key][d.key] && SCHEDULE[key][d.key].length); return f ? f.key : DAYS[0].key; }
+
+  // ---------- Open spot (inline) ----------
+  function openSpot(key, replace = true) {
+    const z = ALL[key]; if (!z) return;
+    Object.values(zlabels).forEach(l => l.classList.remove('show'));
+    current = key;
+    Object.entries(groups).forEach(([k, g]) => g.classList.toggle('active', k === key));
+
+    document.documentElement.style.setProperty('--zc', z.color);
+    $('.panel-inner').style.setProperty('--zc', z.color);
+    sheetTitle.textContent = (z.code ? z.code + '｜' : '') + z.name;
+    sheetTitleEn.textContent = z.nameEn;
+
+    if (z.type === 'stage') {
+      document.body.dataset.mode = 'stage';
+      sheetEyebrow.textContent = '舞台與活動空間 · STAGE';
+      currentDay = firstDayWithSessions(key);
+      renderDayTabs(z); renderSchedule(z);
+      setDotLabels(['節目表', '位置圖']);
+    } else {
+      document.body.dataset.mode = 'zone';
+      sheetEyebrow.textContent = '展區 · ZONE';
+      sheetBlurb.textContent = z.blurb;
+      sheetHighlights.innerHTML = '';
+      (z.highlights || []).forEach(h => { const el = document.createElement('div'); el.className = 'hl'; el.innerHTML = `<span class="hl-dot"></span>${h}`; sheetHighlights.appendChild(el); });
+      setDotLabels(['展區介紹', '放大地圖']);
+    }
+    zoneMapImg.src = `assets/zone-${key}.webp`;
+    zoneMapImg.alt = `${z.name} 位置放大圖`;
+    jumpToPage(0); markDots(0);
+    requestAnimationFrame(() => { jumpToPage(0); updateDots(); });
+    playAnim();
+    if (replace) history.replaceState({ spot: key }, '', '#spot=' + key);
+  }
+
+  // ---------- 2-page carousel (info + zoomed map) ----------
+  // Jump instantly: an animated scroll on a `scroll-snap-type: mandatory`
+  // container gets re-snapped back to the current page mid-flight in Chrome.
+  // Touch swiping still animates natively.
+  // markDots() is called here rather than left to the scroll listener, which
+  // does not reliably fire for programmatic jumps.
+  function scrollToPage(i) { carousel.scrollLeft = i * carousel.clientWidth; markDots(i); }
+  const jumpToPage = scrollToPage;
+  function markDots(idx) {
+    [...carouselDots.children].forEach((d, i) => d.classList.toggle('active', i === idx));
+    zoneMore.classList.toggle('off', idx !== 0);
+  }
+  function updateDots() { markDots(Math.round(carousel.scrollLeft / Math.max(1, carousel.clientWidth))); }
+  ['資訊', '放大地圖'].forEach((lbl, i) => {
+    const d = document.createElement('button'); d.className = 'cdot' + (i === 0 ? ' active' : '');
+    d.setAttribute('aria-label', lbl);
+    d.addEventListener('click', () => scrollToPage(i));
+    carouselDots.appendChild(d);
+  });
+  function setDotLabels(labels) { [...carouselDots.children].forEach((d, i) => d.setAttribute('aria-label', labels[i])); }
+  carousel.addEventListener('scroll', updateDots, { passive: true });
+  zoneMore.addEventListener('click', () => scrollToPage(1));
+
+  // ---------- Events ----------
+  overlay.addEventListener('click', e => { const g = e.target.closest('.zone-group'); if (g) openSpot(g.dataset.zone); });
+  overlay.addEventListener('keydown', e => { const g = e.target.closest('.zone-group'); if (g && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openSpot(g.dataset.zone); } });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && legend.dataset.open === 'true') legend.dataset.open = 'false';
+  });
+
+  $('#btnLegend').addEventListener('click', () => legend.dataset.open = 'true');
+  $('#legendClose').addEventListener('click', () => legend.dataset.open = 'false');
+  legend.addEventListener('click', e => { if (e.target === legend) legend.dataset.open = 'false'; });
+
+  // ---------- Share ----------
+  let toastTimer = null;
+  function toast(msg) { toastEl.textContent = msg; toastEl.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200); }
+  async function shareMap(extraText = '', spotKey = '') {
+    const base = location.origin + location.pathname;
+    const url = spotKey ? `${base}#spot=${spotKey}` : base;
+    const title = '2026 Meet Greater South 亞灣新創大南方 互動展區地圖';
+    const text = extraText || '快來探索展區介紹與舞台節目表!';
+    if (window.liff && liff.isInClient && liff.isInClient()) { try { await liff.shareTargetPicker([{ type:'text', text:`${title}\n${text}\n${url}` }]); return; } catch (err) {} }
+    if (navigator.share) { try { await navigator.share({ title, text, url }); return; } catch (err) { return; } }
+    try { await navigator.clipboard.writeText(`${title} ${url}`); toast('連結已複製到剪貼簿'); } catch (err) { prompt('複製此連結分享:', url); }
+  }
+  $('#btnShare').addEventListener('click', () => shareMap('', current || ''));
+
+  // ---------- Intro reveal + load ----------
+  const baseImg = mapFrame.querySelector('.map-base');
+
+  // Chrome can commit a frame before the map image finishes decoding and then
+  // never repaint it — the frame stays blank even though the image is loaded.
+  // Touching a paint-only property once the decode resolves forces the repaint.
+  function repaintBase() {
+    baseImg.style.opacity = '0.999';
+    requestAnimationFrame(() => requestAnimationFrame(() => { baseImg.style.opacity = ''; }));
+  }
+  function ensurePainted() {
+    (baseImg.decode ? baseImg.decode().catch(() => {}) : Promise.resolve()).then(repaintBase);
+  }
+
+  const markReady = () => { ensurePainted(); overlay.classList.add('intro'); setTimeout(() => overlay.classList.remove('intro'), 2600); };
+  if (baseImg.complete) markReady(); else baseImg.addEventListener('load', markReady, { once: true });
+  // the picked srcset candidate can change on resize/orientation change
+  addEventListener('resize', ensurePainted, { passive: true });
+
+  // default: open 日光舞台 (or deep-linked spot)
+  const initKey = (location.hash.match(/spot=([a-z0-9-]+)/) || [])[1];
+  openSpot((initKey && ALL[initKey]) ? initKey : 'sunrise');
+
+  window.addEventListener('load', () => {
+    if (window.liff) { const liffId = (document.documentElement.dataset.liffId || '').trim(); if (liffId) liff.init({ liffId }).catch(err => console.warn('LIFF init failed', err)); }
+  });
+
+  // ---------- Calibration mode (?cal=1) ----------
+  if (new URLSearchParams(location.search).get('cal')) {
+    const g = document.createElementNS(SVGNS, 'g'); g.setAttribute('class', 'cal-grid');
+    for (let x = 0; x <= VB.w; x += 100) { const l = document.createElementNS(SVGNS, 'line'); l.setAttribute('x1', x); l.setAttribute('y1', 0); l.setAttribute('x2', x); l.setAttribute('y2', VB.h); if (x % 500 === 0) { l.setAttribute('class', 'major'); const t = document.createElementNS(SVGNS, 'text'); t.setAttribute('x', x + 4); t.setAttribute('y', 40); t.textContent = x; g.appendChild(t); } g.appendChild(l); }
+    for (let y = 0; y <= VB.h; y += 100) { const l = document.createElementNS(SVGNS, 'line'); l.setAttribute('x1', 0); l.setAttribute('y1', y); l.setAttribute('x2', VB.w); l.setAttribute('y2', y); if (y % 500 === 0) { l.setAttribute('class', 'major'); const t = document.createElementNS(SVGNS, 'text'); t.setAttribute('x', 4); t.setAttribute('y', y - 6); t.textContent = y; g.appendChild(t); } g.appendChild(l); }
+    overlay.appendChild(g);
+    let buf = [];
+    overlay.addEventListener('click', e => { const r = overlay.getBoundingClientRect(); const x = Math.round((e.clientX - r.left) / r.width * VB.w); const y = Math.round((e.clientY - r.top) / r.height * VB.h); buf.push(`${x},${y}`); console.log('point:', x, y, '| poly:', '"' + buf.join(' ') + '"'); }, true);
+    window.calReset = () => { buf = []; console.log('cal buffer reset'); };
+    console.log('Calibration mode ON. Click to log coords.');
+  }
+})();
+</script>
+</body>
+</html>
