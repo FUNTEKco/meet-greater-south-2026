@@ -1,7 +1,11 @@
 # 2026 Meet Greater South 亞灣新創大南方 — 互動展區地圖
 
+**線上版:https://funtekco.github.io/meet-greater-south-2026/**
+
 比照 `ai-taiwan-2026` 的做法,把大會地圖與舞台節目總表做成一頁式互動地圖。
 單一檔案 `index.html`(無框架、無外部相依),搭配 `assets/` 內的圖片即可部署。
+
+推送到 `main` 後由 GitHub Pages 自動發佈(來源:`main` 分支根目錄)。
 
 ## 內容來源
 
