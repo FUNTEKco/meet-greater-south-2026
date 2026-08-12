@@ -4,7 +4,7 @@ import os, subprocess, json
 from PIL import Image, ImageDraw
 
 PROJ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC = os.path.join(PROJ, "map", "Meet 大南方地圖.jpg")
+SRC = os.path.join(PROJ, "data", "map", "Meet 大南方地圖.jpg")
 OUT = os.path.join(PROJ, "assets")
 SCRATCH = os.path.join(PROJ, ".build")
 
