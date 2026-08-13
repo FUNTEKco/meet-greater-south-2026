@@ -191,6 +191,11 @@
   .highlights { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
   .hl { display: flex; align-items: center; gap: 8px; padding: 11px 13px; border-radius: 13px; background: var(--glass); border: 1px solid var(--glass-border); font-size: 13px; font-weight: 600; }
   .hl .hl-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--zc, var(--accent)); box-shadow: 0 0 8px var(--zc); flex: 0 0 auto; }
+  /* 多行條目(如生態系夥伴 P1-01 ~ P1-04):第一行是攤位編號,其餘為名稱 */
+  .hl.multi { align-items: flex-start; }
+  .hl.multi .hl-dot { margin-top: 6px; }
+  .hl .hl-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .hl .hl-code { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: var(--zc, var(--accent)); }
 
   /* stage / schedule view */
   .day-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
@@ -480,7 +485,7 @@
       label:{x:3871,y:559}, polys:['3694,469 4048,469 4048,649 3694,649'] },
     { key:'p', code:'P', name:'生態系夥伴', nameEn:'Ecosystem Partners', color:'#F0862F',
       blurb:'生態系夥伴專區,集結加速器、創投與共享空間等新創支持單位,位於櫃買中心創櫃新星主題專區旁,攤位編號 P 1-01 ~ P 1-04。',
-      highlights:['P1-1 酷日國際 Crew Taiwan','P1-2 臺中軟體園區加速器','P1-3 中華民國創業投資商業同業公會','P1-4 造夢基地共享空間'],
+      highlights:['P1-01\n酷日國際 Crew Taiwan','P1-02\n臺中軟體園區智慧創新應用加速器\n頂騰創新','P1-03\n中華民國創業投資商業同業公會','P1-04\n易威企業\n造夢基地共享空間'],
       label:{x:3509,y:578}, polys:['3419,488 3599,488 3599,668 3419,668'] }
   ];
 
@@ -649,7 +654,20 @@
       sheetEyebrow.textContent = '展區 · ZONE';
       sheetBlurb.textContent = z.blurb;
       sheetHighlights.innerHTML = '';
-      (z.highlights || []).forEach(h => { const el = document.createElement('div'); el.className = 'hl'; el.innerHTML = `<span class="hl-dot"></span>${h}`; sheetHighlights.appendChild(el); });
+      (z.highlights || []).forEach(h => {
+        const el = document.createElement('div');
+        const lines = String(h).split('\n');
+        if (lines.length > 1) {
+          // 第一行當攤位編號,其餘每行各佔一列
+          el.className = 'hl multi';
+          const body = lines.map((t, i) => `<span class="${i === 0 ? 'hl-code' : ''}">${t}</span>`).join('');
+          el.innerHTML = `<span class="hl-dot"></span><span class="hl-text">${body}</span>`;
+        } else {
+          el.className = 'hl';
+          el.innerHTML = `<span class="hl-dot"></span>${h}`;
+        }
+        sheetHighlights.appendChild(el);
+      });
       setDotLabels(['展區介紹', '放大地圖']);
     }
     zoneMapImg.src = `assets/zone-${key}.webp`;
