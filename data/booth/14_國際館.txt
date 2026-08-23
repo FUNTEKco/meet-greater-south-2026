@@ -1,7 +1,7 @@
 文件名稱：2026 Meet 大南方｜國際館 展區參展商名錄
 活動名稱：2026 Meet 大南方
 展區名稱：國際館
-參展商家數：31 家（本活動共 14 個展區、192 家參展商）
+參展商家數：31 家（本活動共 20 個展區、244 家參展單位）
 本文件內容：此展區所有參展商的公司名稱、攤位編號、產品與服務介紹。
 
 ============================================================
@@ -51,7 +51,9 @@
 摘要：EvoFlow Technologies 參加 2026 Meet 大南方，設攤於「國際館」展區，攤位編號 GP3-01。
 產品與服務介紹：
 EvoFlow Technologies is a Russian-registered automation and digital transformation company focused on helping businesses reduce manual work, improve data quality, and automate repetitive operational processes.
+
 We design and build practical automation solutions for document control, reporting, data consolidation, workflow optimization, and system integration. Our experience is especially strong in EPC, construction, manufacturing, and other data-heavy industries where teams work with large volumes of Excel files, reports, registers, and technical documentation.
+
 Our approach is based on analyzing the client’s existing processes and tools, then creating simple, reliable automation systems that reduce errors, save time, and help teams focus on higher-value work.
 
 ============================================================
@@ -161,8 +163,11 @@ Taption 是一家總部位於美國的 AI 技術公司，成立於 2020 年，�
 摘要：縱藝科技 參加 2026 Meet 大南方，設攤於「國際館」展區，攤位編號 GP3-10。
 產品與服務介紹：
 Zonic 致力於打造專業影片後期製作的智慧操作層。定位於原始素材與初剪成片之間，Zonic 透過人工智慧理解素材內容、挑選合適片段並自動組裝時間軸，直接輸出至業界標準剪輯軟體。
+
 Zonic 的核心技術，是以業界少見規模的真實商業製作專案檔案資料庫訓練而成，紀錄專業剪輯師實際的剪輯決策，而非人工合成資料。這種學習而來的剪輯判斷力，正是 Zonic 與一般人工智慧剪輯工具的根本差異。
+
 台灣是 Zonic 的關鍵市場。Zonic 已在台灣完成子公司登記，並與當地影視製作公司直接合作,取得真實專案素材與剪輯回饋，持續強化人工智慧對專業剪輯的理解。這樣的合作讓 Zonic 得以在實際商業製作中測試並導入技術，與台灣影視產業建立長期共榮的夥伴關係。
+
 Zonic 的願景，是成為影片製作不可或缺的人工智慧基礎設施層，服務範圍將從中小型製作團隊擴展至電視台與串流平台，並延伸至次世代裝置的人工智慧影像擷取應用。
 
 ============================================================
@@ -200,6 +205,7 @@ DROP System是一個以區塊鏈創建的積分獎賞平台，透過貨幣化及
 摘要：卡路思有限公司 參加 2026 Meet 大南方，設攤於「國際館」展區，攤位編號 GP3-13。
 產品與服務介紹：
 KALOS 是新一代音樂家的成長及營運平台，致力於為音樂家提供指導、工具和資源，幫助他們成為創意企業家，實現成長並掌握自己的未來。我們的主要產品及服務包括：
+
 創意企業家培訓：幫助音樂家掌握商業技能，提升其在音樂產業中的競爭力。
 演藝訓練：提供專業的表演技巧訓練，增強音樂家的舞台表現。
 經理人及推廣服務：支持音樂家在市場上的推廣與品牌建設。
@@ -230,7 +236,9 @@ Creato Academy 為中學及大學教育機構提供創意與科技課程。我�
 摘要：去比星有限公司 參加 2026 Meet 大南方，設攤於「國際館」展區，攤位編號 GP3-15。
 產品與服務介紹：
 我們是一家機器人公司，「Second Space」 是我們在高雄為創作者們設立的 24/7 全天候營業共同工作空間，這個空間有我們的秘密 AI 機器人咖啡師為您服務 🤫
+
 Second Space 是專門為工程師、設計師，以及科技企業家所設計的會員制空間，致力於推廣雙語活動、課程和社群交流。不論是為了創造獨角獸企業使用Pytorch或精進Figma能力，我們提供一處適合學習、工作及放鬆的好去處。
+
 Second Space 採用會員邀請制且名額有限- 如此，我們確保來這裡的人都如你一樣擁有相同調性。這裡擁有舒適的氛圍及潮流新科技。
 
 ============================================================
@@ -293,6 +301,8 @@ XRIO 致力於為會展（MICE）及餐飲旅宿（HORECA）產業提供永續�
 產品與服務介紹：
 I Creation 策藝相信，藝術不僅是文化的表達，更是商業溝通最有力的語言。我們的願景是打造一個讓表演藝術與品牌世界深度融合的生態系統。
 我們的使命是透過策略性的藝術策劃，幫助企業深化品牌文化、協助藝術家建立可持續的職涯，並為藝術教育機構開拓通往產業的橋樑。
+
+
 我們相信每一個創意都需要紮實的策略基礎。在執行前，我們深入分析目標、受眾與市場環境，確保每個決策都有明確的商業邏輯。
 
 ============================================================
@@ -378,6 +388,7 @@ We're building at the intersection of generative AI and symbolic world models. O
 摘要：Taigi AI Labs 合同会社 參加 2026 Meet 大南方，設攤於「國際館」展區，攤位編號 GP3-27。
 產品與服務介紹：
 Taigi AI Labs 是一家來自日本、專注於台語 AI 的新創公司。我們提供台語語音合成（TTS）、語音辨識（STT）、台語／華語翻譯、語言判定（LID）與 API 串接服務，協助企業、教育機構、醫療照護、公共服務與內容產業，將台語能力導入實際業務流程。
+
 常見應用包含客服應對、接待服務、字幕製作、內容製作、高齡照護、無障礙服務與既有系統整合。我們可從小規模 PoC 開始，依照客戶的資料形式、使用情境與營運需求，逐步設計可落地的台語 AI 解決方案。
 
 ============================================================
@@ -415,7 +426,9 @@ A Japan-based deep-tech materials company developing next-generation solutions f
 摘要：CHOSEN Digital Co.,Ltd. 參加 2026 Meet 大南方，設攤於「國際館」展區，攤位編號 GP3-30。
 產品與服務介紹：
 電動汽車普及、人工智能和數據中心發展日新月異，但能源基礎設施尚未做好準備。
+
 CHOSEN 的人工智能驅動型能源聚合和虛擬電廠平臺連接電動汽車充電樁、變壓器、建築物和分布式能源資產，優化建築物到電網的電力使用，從而降低高達 75% 的能源負荷和成本，並提高電網靈活性，促進清潔能源的發展。
+
 CHOSEN 曾榮獲多項創業大賽的泰國冠軍、東盟冠軍和全球冠軍。
 
 ============================================================
