@@ -34,7 +34,7 @@ ZONES = {
     "未來零售與餐飲科技":           (6,  "未來零售與餐飲科技",           "f"),
     "生態系夥伴":                   (7,  "生態系夥伴",                   "p"),
     "南臺灣科研產業化平台":         (8,  "南臺灣科研產業化平台",         "sig"),
-    "TAA臺灣科技新創基地":          (9,  "TAA臺灣科技新創基地",          "cx-07"),
+    "TAA臺灣科技新創基地":          (9,  "TTA臺灣科技新創基地",          "cx-07"),
     "中華電信5G加速器專區":         (10, "中華電信5G加速器專區",         "ep-02"),
     "經濟部產業發展署主題館":       (11, "經濟部產業發展署主題館",       "cx-01"),
     "經濟部中小及新創企業署主題館": (12, "經濟部中小及新創企業署主題館", "cx-05"),
@@ -48,8 +48,28 @@ ZONES = {
     "風土餐桌市集":                 (20, "風土餐桌市集",                 "t"),
 }
 
+# CSV 展區名 -> 對外顯示用展區名。
+# 主辦單位 CSV 把 TAIWAN TECH ARENA 誤植為 TAA，地圖與官方縮寫都是 TTA。
+ZONE_LABEL = {
+    "TAA臺灣科技新創基地": "TTA臺灣科技新創基地",
+}
+
+# 攤位編號 -> 對外顯示用名稱。多行以 \n 分隔（第一行為主，其餘為場域/品牌名）。
+# 主辦單位 CSV 與地圖圖例對同一家寫法不同，這裡是拍板後的統一寫法。
+NAME_OVERRIDE = {
+    "P1-02": "臺中軟體園區智慧創新應用加速器\n頂騰創新",
+    "P1-04": "易威企業\n造夢基地共享空間",
+    "M1-01": "正美集團",
+    "M1-02": "ACCUPASS 活動通",
+}
+
 # 地圖上有標示、但主辦單位未提供參展商名錄的展位
 NO_ROSTER = "CX-08 中華民國全國中小企業總會（單一單位展位，主辦單位未提供參展商名錄）"
+
+
+def pad_code(code):
+    """攤位編號一律補零成兩位數：T3-1 -> T3-01、H2-1 -> H2-01。CX-01 等已補零者不變。"""
+    return re.sub(r"-(\d+)$", lambda m: "-" + m.group(1).zfill(2), code)
 
 SEP = "=" * 60
 
@@ -68,6 +88,11 @@ def read_rows():
                 if r["展區"] not in ZONES:
                     raise SystemExit(f"未知的展區名,請先在 ZONES 補上對照:「{r['展區']}」({path})")
                 r["參展類別"] = cat
+                r["攤位編號"] = pad_code(r["攤位編號"])
+                r["顯示名稱"] = NAME_OVERRIDE.get(r["攤位編號"], r["公司名稱"])
+                # 顯示名稱與 CSV 公司名稱不同的部分，在 txt 留成別名供檢索
+                alias = [t for t in r["顯示名稱"].split("\n") if t and t != r["公司名稱"]]
+                r["別名"] = "、".join(alias)
                 rows.append(r)
     return rows
 
@@ -95,30 +120,32 @@ def main():
 
     for zone in order:
         num, fname, _ = ZONES[zone]
+        label = ZONE_LABEL.get(zone, zone)
         items = by_zone[zone]
         n = len(items)
         out = [
-            f"文件名稱：{EVENT}｜{zone} 展區參展商名錄",
+            f"文件名稱：{EVENT}｜{label} 展區參展商名錄",
             f"活動名稱：{EVENT}",
-            f"展區名稱：{zone}",
+            f"展區名稱：{label}",
             f"參展商家數：{n} 家（{scope}）",
             "本文件內容：此展區所有參展商的公司名稱、攤位編號、產品與服務介紹。",
             "", SEP, "",
-            f"[展區索引] {EVENT}｜{zone}",
-            f"「{zone}」展區共有 {n} 家參展商，攤位編號與公司名稱如下：",
+            f"[展區索引] {EVENT}｜{label}",
+            f"「{label}」展區共有 {n} 家參展商，攤位編號與公司名稱如下：",
         ]
         for r in items:
             out.append(f"- {r['攤位編號']}｜{r['公司名稱']}")
         for i, r in enumerate(items, 1):
             out += [
                 "", SEP, "",
-                f"[參展商 {i:02d}/{n}] {r['公司名稱']}（{zone}）",
+                f"[參展商 {i:02d}/{n}] {r['公司名稱']}（{label}）",
                 f"公司名稱：{r['公司名稱']}",
-                f"展區：{zone}",
+                *( [f"別名：{r['別名']}"] if r["別名"] else [] ),
+                f"展區：{label}",
                 f"攤位編號：{r['攤位編號']}",
                 f"參展類別：{r['參展類別']}",
                 f"活動名稱：{EVENT}",
-                f"摘要：{r['公司名稱']} 參加 {EVENT}，設攤於「{zone}」展區，"
+                f"摘要：{r['公司名稱']} 參加 {EVENT}，設攤於「{label}」展區，"
                 f"攤位編號 {r['攤位編號']}。",
                 "產品與服務介紹：",
                 r["產品服務"].strip(),
@@ -136,7 +163,7 @@ def main():
     ]
     for zone in order:
         num, fname, _ = ZONES[zone]
-        ov.append(f"- {zone}：{len(by_zone[zone])} 家"
+        ov.append(f"- {ZONE_LABEL.get(zone, zone)}：{len(by_zone[zone])} 家"
                   f"（詳細名錄見檔案 {num:02d}_{fname}.txt）")
     ov += [
         "",
@@ -152,7 +179,7 @@ def main():
     booths = {}
     for zone in order:
         key = ZONES[zone][2]
-        booths[key] = [[r["攤位編號"], r["公司名稱"], r["產品服務"].strip()]
+        booths[key] = [[r["攤位編號"], r["顯示名稱"], r["產品服務"].strip()]
                        for r in by_zone[zone]]
 
     lines = ["  const BOOTHS = {"]
