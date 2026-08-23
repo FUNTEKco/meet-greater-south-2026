@@ -11,22 +11,37 @@
 
 | 資料 | 來源檔 |
 | --- | --- |
-| 底圖、展區座標、分區放大圖 | `data/map/Meet 大南方地圖.jpg`(6011×3000) |
+| 底圖、展區座標、分區放大圖 | `data/map/(0820更新)地圖.jpg`(5947×3000) |
 | 舞台節目表(逐字轉錄) | `data/schedule/活動總表.jpg` |
 | 展區中英文名稱 | 上述地圖右側圖例 |
-| 參展商名錄(尚未用於頁面) | `data/booth/*.txt`(14 展區、192 家) |
+| 參展商名錄 | `data/booth-raw/*.csv`(主辦單位匯出,未進版控) |
+| 整理後名錄(PinChat AI 訓練用) | `data/booth/*.txt`(20 展區、244 家) |
+
+參展單位 244 家 = 國內參展商 194 + 國際參展商 31 + 市集團隊 19。
+`CX-08 中華民國全國中小企業總會` 為單一單位展位,主辦單位未提供名錄,不計入上述家數。
 
 ## 互動內容
 
 - **舞台與活動空間(5)**:日光舞台、狂熱舞台、共創空間、企業媒合空間、投資媒合空間 → 點擊看 8/28(五)、8/29(六)節目表
-- **展區(21)**:CX-01 ~ CX-08、EP-01 ~ EP-03、GP 國際館、H 醫療健康與高齡照護、T 風土餐桌市集、SIG、E、F、S、M、G、P → 點擊看介紹與攤位編號
+- **展區(21)**:CX-01 ~ CX-08、EP-01 ~ EP-03、GP 國際館、H 醫療健康與高齡照護、T 風土餐桌市集、SIG、E、F、S、M、G、P → 點擊看介紹與**攤位名錄**
+- **攤位名錄**:每個攤位一顆按鈕(攤位編號 + 攤商名稱),點擊在下方展開該攤商的產品與服務介紹
 - 每個項目都有第二頁「放大地圖」(右滑或按 `»`)
 - 右上角清單鈕開啟完整圖例;可用 `#spot=<key>` 深層連結(例:`#spot=cx-06`)
 - `?cal=1` 開啟座標校正格線,點擊會在 console 印出 viewBox 座標
 
-## 重新產生圖片
+## 重新產生資料與圖片
 
-底圖或展區位置有變更時:
+**參展商資料更新時**(主辦單位寄來新的 CSV,放進 `data/booth-raw/`):
+
+```bash
+python3 tools/build-booth-data.py
+```
+
+會以 CSV 為唯一資料來源,同時重寫 `data/booth/*.txt`(含 `00_展區總覽.txt` 的加總數字)
+與 `index.html` 內 `BOOTHS` 標記區塊。CSV 出現未登記的展區名會直接中止,
+需先在腳本的 `ZONES` 補上「展區名 → 檔案序號 / spot key」對照。
+
+**底圖或展區位置有變更時**:
 
 ```bash
 python3 tools/build-assets.py     # 需要 Pillow 與 cwebp
@@ -35,8 +50,12 @@ python3 tools/build-assets.py     # 需要 Pillow 與 cwebp
 會輸出 `assets/map-base.webp`(+ jpg fallback)與 26 張 `assets/zone-*.webp`,
 並在 `.build/verify.png` 產生一張把所有可點擊區塊描邊的檢查圖。
 
-座標定義在 `tools/build-assets.py` 的 `SPOTS`(以原始 6011×3000 圖的像素為單位);
-`index.html` 內的 `polys` 是換算後的 viewBox 座標(`0 0 5046 2362`),兩邊需一起更新。
+座標定義在 `tools/build-assets.py` 的 `SPOTS`(以原始 5947×3000 圖的像素為單位);
+`index.html` 內的 `polys` 是換算後的 viewBox 座標(`0 0 5025 2363`),兩邊需一起更新。
+viewBox 尺寸改變時,`index.html` 有 4 處要同步:CSS `--ratio`、`.map-frame` 的
+`aspect-ratio`、SVG 的 `viewBox`、JS 的 `const VB`。
+
+底圖換版後記得同步調整 `assets/...?v=` 版本參數,舊訪客才不會拿到快取的舊地圖。
 
 ## 已知細節
 
@@ -45,3 +64,5 @@ python3 tools/build-assets.py     # 需要 Pillow 與 cwebp
   圖越大越容易發生,但**與尺寸上限無關**——單純是重繪時機。
 - **換頁採直接指定 `scrollLeft`,不做動畫**:`scroll-snap-type: mandatory` 會在動畫途中把捲動位置彈回原頁。
   手指滑動的原生慣性捲動不受影響。換頁後直接呼叫 `markDots()`,不倚賴 `scroll` 事件。
+- **同一展區多家共用一個攤位編號**:CX-01 ~ CX-07、EP-02 等主題館在主辦單位資料中,
+  所有參展商共用館別編號(例:CX-02 有 21 家),攤位按鈕因此會重複顯示同一組編號,屬正常。

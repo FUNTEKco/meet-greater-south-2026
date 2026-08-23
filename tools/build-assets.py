@@ -4,59 +4,59 @@ import os, subprocess, json
 from PIL import Image, ImageDraw
 
 PROJ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC = os.path.join(PROJ, "data", "map", "Meet 大南方地圖.jpg")
+SRC = os.path.join(PROJ, "data", "map", "(0820更新)地圖.jpg")
 OUT = os.path.join(PROJ, "assets")
 SCRATCH = os.path.join(PROJ, ".build")
 
-# floor-plan card crop inside the original 6011x3000 poster
-CROP = (84, 512, 5130, 2874)          # -> 5046 x 2362, ratio 2.1363
+# floor-plan card crop inside the original 5947x3000 poster (0820 update)
+CROP = (80, 569, 5105, 2932)          # -> 5025 x 2363, ratio 2.1265
 VBW, VBH = CROP[2] - CROP[0], CROP[3] - CROP[1]
 
 # key: (box in ORIGINAL poster px, colour)  — box is the zoom/label anchor
 # EXTRA_HITS adds further rectangles for L-shaped areas.
 SPOTS = {
     # ---- stages / spaces (schedule) ----
-    "sunrise":    ((1252, 620, 2016, 1328), "#E6298F"),
-    "fever":      ((4244, 724, 4756, 1132), "#F5B417"),
-    "cocreation": ((320, 2048, 764, 2436), "#1E6FD9"),
-    "match2":     ((3096, 626, 3660, 929), "#66C6E8"),
-    "match1":     ((3676, 624, 3988, 932), "#3FBFB4"),
+    "sunrise":    ((1235, 680, 1999, 1388), "#E6298F"),
+    "fever":      ((4227, 784, 4739, 1192), "#F5B417"),
+    "cocreation": ((303, 2108, 747, 2496), "#1E6FD9"),
+    "match2":     ((3079, 686, 3643, 989), "#66C6E8"),
+    "match1":     ((3659, 684, 3971, 992), "#3FBFB4"),
     # ---- industry theme pavilions ----
-    "cx-01": ((916, 2048, 2868, 2388), "#5FBBDA"),
-    "cx-02": ((3096, 2048, 4864, 2388), "#5FBBDA"),
-    "cx-03": ((3092, 1336, 3452, 1688), "#5FBBDA"),
-    "cx-04": ((3092, 1004, 3412, 1188), "#5FBBDA"),
-    "cx-05": ((2168, 796, 2868, 1108), "#5FBBDA"),
-    "cx-06": ((2168, 1312, 2868, 1900), "#5FBBDA"),
-    "cx-07": ((916, 1492, 1384, 1840), "#5FBBDA"),
-    "cx-08": ((3900, 1210, 4050, 1400), "#5FBBDA"),
-    "ep-01": ((1716, 1492, 1876, 1840), "#7FCCE4"),
-    "ep-02": ((1436, 1492, 1668, 1840), "#7FCCE4"),
-    "ep-03": ((1036, 984, 1228, 1324), "#7FCCE4"),
+    "cx-01": ((899, 2108, 2851, 2448), "#5FBBDA"),
+    "cx-02": ((3079, 2108, 4847, 2448), "#5FBBDA"),
+    "cx-03": ((3075, 1396, 3435, 1748), "#5FBBDA"),
+    "cx-04": ((3075, 1064, 3395, 1248), "#5FBBDA"),
+    "cx-05": ((2151, 856, 2851, 1168), "#5FBBDA"),
+    "cx-06": ((2151, 1372, 2851, 1960), "#5FBBDA"),
+    "cx-07": ((899, 1552, 1367, 1900), "#5FBBDA"),
+    "cx-08": ((3883, 1270, 4033, 1460), "#5FBBDA"),
+    "ep-01": ((1699, 1552, 1859, 1900), "#7FCCE4"),
+    "ep-02": ((1419, 1552, 1651, 1900), "#7FCCE4"),
+    "ep-03": ((1019, 1044, 1211, 1384), "#7FCCE4"),
     # ---- pavilions & solution clusters ----
-    "gp":  ((353, 1425, 745, 1965), "#A85DA3"),
-    "h":   ((1938, 1427, 2073, 1902), "#3BB1B1"),
-    "t":   ((312, 800, 700, 1305), "#9C7A56"),
-    "sig": ((3522, 1315, 3848, 1660), "#3DB76D"),
-    "e":   ((3082, 1739, 4623, 1889), "#EC1E8C"),
-    "f":   ((3909, 1468, 4040, 1642), "#1B63C4"),
-    "s":   ((4105, 1346, 4236, 1655), "#78C172"),
-    "m":   ((4302, 1309, 4667, 1664), "#F5C21F"),
-    "g":   ((3778, 1010, 4132, 1132), "#B9D958"),
-    "p":   ((3511, 1004, 3675, 1176), "#F0862F"),
+    "gp":  ((336, 1485, 728, 2025), "#A85DA3"),
+    "h":   ((1921, 1487, 2056, 1962), "#3BB1B1"),
+    "t":   ((295, 860, 683, 1365), "#9C7A56"),
+    "sig": ((3505, 1375, 3831, 1720), "#3DB76D"),
+    "e":   ((3065, 1799, 4606, 1949), "#EC1E8C"),
+    "f":   ((3892, 1528, 4023, 1702), "#1B63C4"),
+    "s":   ((4088, 1406, 4219, 1715), "#78C172"),
+    "m":   ((4285, 1369, 4650, 1724), "#F5C21F"),
+    "g":   ((3761, 1070, 4115, 1192), "#B9D958"),
+    "p":   ((3494, 1064, 3658, 1236), "#F0862F"),
 }
 
 # extra hit rectangles (original poster px) for areas that are not a single block
 EXTRA_HITS = {
-    "t": [(183, 855, 277, 1740)],          # the T3-9 … T3-17 column down the left edge
+    "t": [(166, 915, 260, 1800)],          # the T3-9 … T3-17 column down the left edge
 }
 
 # zoom crops need the whole cluster, not just the anchor block
 ZOOM_BOX = {
-    "t": (183, 795, 710, 1745),
+    "t": (166, 855, 693, 1805),
 }
 
-LABEL_AT = {"t": [420, 470]}
+LABEL_AT = {"t": [407, 473]}
 
 MIN_HIT = 180  # minimum hotspot side in viewBox px, so small booths stay tappable
 

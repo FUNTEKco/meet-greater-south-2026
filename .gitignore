@@ -7,3 +7,6 @@
 # 內部文件 — repo 為 public,不放進版控
 Meet 大南方與 FUNTEK 協作時程表.pdf
 Meet 大南方參展商資料.xlsx
+
+# 主辦單位原始匯出檔 — repo 為 public,只放整理後的 data/booth/*.txt
+data/booth-raw/
