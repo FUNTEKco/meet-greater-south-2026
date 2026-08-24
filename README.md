@@ -7,6 +7,25 @@
 
 推送到 `main` 後由 GitHub Pages 自動發佈(來源:`main` 分支根目錄)。
 
+## 三個網址
+
+LINE 圖文選單要「舞台」「展區」各佔一格,因此拆出兩個子頁網址:
+
+| 網址 | 內容 |
+| --- | --- |
+| `/meet-greater-south-2026/` | 完整版:舞台 + 展區都可點 |
+| `/meet-greater-south-2026/stage/` | 只有 5 個舞台與活動空間可點,預設開日光舞台 |
+| `/meet-greater-south-2026/zone/` | 只有 21 個展區可點,預設開 CX-01 |
+
+`stage/index.html` 與 `zone/index.html` 只是導向頁(自帶 `<title>` / OG,貼到 LINE 有各自的預覽標題),
+會 `location.replace()` 到根目錄的 `?view=stage` / `?view=zone`,並把 `#spot=` 一起帶過去。
+內容本體仍只有一份 `index.html`,不需要同步維護副本。
+
+`index.html` 裡的 `VIEWS` 物件集中放兩個模式的標題、提示文字與預設開啟項目;
+沒有 `?view=` 參數時(既有的根網址)行為完全不變。
+單一模式下另一類的熱區不會建立(不可點、不參與進場動畫),清單只列出該分類,
+並在清單底部提供切換到另一頁的連結。
+
 ## 內容來源
 
 | 資料 | 來源檔 |
@@ -56,6 +75,16 @@ viewBox 尺寸改變時,`index.html` 有 4 處要同步:CSS `--ratio`、`.map-fr
 `aspect-ratio`、SVG 的 `viewBox`、JS 的 `const VB`。
 
 底圖換版後記得同步調整 `assets/...?v=` 版本參數,舊訪客才不會拿到快取的舊地圖。
+
+**三張社群預覽圖(貼到 LINE / FB 的縮圖)**:
+
+```bash
+python3 tools/build-og.py     # 需要 Pillow;字型用 macOS 內建 Heiti TC
+```
+
+會輸出 `assets/og-home.jpg`、`og-stage.jpg`、`og-zone.jpg`(各 1200×630),
+熱區座標直接讀 `index.html` 的 `polys`,舞台頁只把 5 個舞台描邊發光、展區頁只描 21 個展區。
+底圖或展區座標換版後要重跑,並同步 `<meta property="og:image">` 的 `?v=` 參數。
 
 ## 已知細節
 

@@ -9,6 +9,12 @@
 <meta property="og:title" content="2026 Meet Greater South 亞灣新創大南方 — 互動展區地圖">
 <meta property="og:description" content="點擊探索展區介紹、放大地圖與舞台節目表。">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://funtekco.github.io/meet-greater-south-2026/">
+<meta property="og:image" content="https://funtekco.github.io/meet-greater-south-2026/assets/og-home.jpg?v=0820">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="大會地圖縮圖">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preload" as="image" href="assets/map-base.webp?v=0820" fetchpriority="high">
 
 <style>
@@ -320,6 +326,8 @@
   .btn:active { transform: scale(0.98); }
   .btn-ghost { background: var(--glass); color: var(--ink); }
   .btn-ghost:hover { background: var(--glass-strong); }
+  .view-switch { display: block; width: 100%; margin-top: 14px; text-align: center; text-decoration: none; color: var(--accent); }
+  .view-switch[hidden] { display: none; }
 
   /* ---------- Toast ---------- */
   .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translate(-50%, 20px); z-index: 120; background: rgba(4,20,31,0.94); border: 1px solid var(--glass-border); color: var(--ink); padding: 11px 18px; border-radius: 999px; font-size: 13px; font-weight: 600; box-shadow: var(--shadow-lg); backdrop-filter: blur(10px); opacity: 0; pointer-events: none; transition: opacity 260ms var(--spring), transform 260ms var(--spring); }
@@ -360,7 +368,7 @@
 <div class="hint" aria-hidden="true">
   <span class="badge">點擊探索</span>
   <span class="pulse-dot"></span>
-  <span>點展區看介紹,點舞台看節目表,右滑看放大地圖</span>
+  <span id="hintText">點展區看介紹,點舞台看節目表,右滑看放大地圖</span>
 </div>
 
 <main class="map-stage">
@@ -431,6 +439,7 @@
     <h2 id="legendTitle">展區與舞台總覽</h2>
     <p class="sub">點選任一項目,即可在下方開啟介紹或節目表。</p>
     <div id="legendList"></div>
+    <a class="btn btn-ghost view-switch" id="viewSwitch" hidden>—</a>
     <button class="btn btn-ghost" id="legendClose" style="margin-top:14px; width:100%;">關閉</button>
   </div>
 </div>
@@ -642,6 +651,43 @@
   const carousel = $('#carousel'), carouselDots = $('#carouselDots'), zoneMapImg = $('#zoneMapImg'), zoneMore = $('#zoneMore');
   const legend = $('#legend'), legendList = $('#legendList'), toastEl = $('#toast');
 
+  // ---------- View scoping (?view=stage / ?view=zone) ----------
+  // LINE 圖文選單要兩個不同網址:stage/ 與 zone/ 兩個子頁分別導到這裡並帶上對應的
+  // ?view=,只保留該類別的可點區塊與清單。沒有這個參數時(既有的根網址)照舊顯示完整版。
+  const VIEWS = {
+    stage: {
+      title: '舞台節目表',
+      doc: '舞台節目表 — 2026 Meet Greater South 亞灣新創大南方',
+      hint: '點地圖上的舞台看兩天節目表,右滑看位置放大圖',
+      legendTitle: '舞台與活動空間', legendSub: '點選任一舞台,即可在下方開啟兩天的節目表。',
+      share: '兩天的舞台節目表,點舞台就看得到!',
+      home: 'sunrise', other: 'zone', otherLabel: '看展區與攤位名錄 ›'
+    },
+    zone: {
+      title: '展區與攤位名錄',
+      doc: '展區與攤位名錄 — 2026 Meet Greater South 亞灣新創大南方',
+      hint: '點展區看介紹與攤位名錄,右滑看放大地圖',
+      legendTitle: '展區總覽', legendSub: '點選任一展區,即可在下方開啟介紹與攤位名錄。',
+      share: '展區介紹與 244 家攤商名錄,點展區就看得到!',
+      home: 'cx-01', other: 'stage', otherLabel: '看舞台節目表 ›'
+    }
+  };
+  const vParam = (new URLSearchParams(location.search).get('view') || '').toLowerCase();
+  const VIEW = VIEWS[vParam] ? vParam : 'all';
+  const inView = z => VIEW === 'all' || z.type === VIEW;
+  document.body.dataset.view = VIEW;
+
+  if (VIEW !== 'all') {
+    const v = VIEWS[VIEW];
+    document.title = v.doc;
+    $('.brand-mark .title').textContent = v.title;
+    $('#hintText').textContent = v.hint;
+    $('#legendTitle').textContent = v.legendTitle;
+    $('#legend .sub').textContent = v.legendSub;
+    const sw = $('#viewSwitch');
+    sw.textContent = v.otherLabel; sw.href = `?view=${v.other}`; sw.hidden = false;
+  }
+
   let current = null, currentDay = DAYS[0].key;
   const groups = {}, zlabels = {};
 
@@ -666,11 +712,11 @@
     g.addEventListener('pointerenter', enter); g.addEventListener('pointerleave', leave);
     g.addEventListener('focus', enter); g.addEventListener('blur', leave);
   }
-  STAGES.forEach(buildSpot); ZONES.forEach(buildSpot);
+  STAGES.filter(inView).forEach(buildSpot); ZONES.filter(inView).forEach(buildSpot);
 
   // ---------- Legend ----------
   function buildLegendGroup(label, list) {
-    const gl = document.createElement('div'); gl.className = 'legend-group-label'; gl.textContent = label; legendList.appendChild(gl);
+    if (label) { const gl = document.createElement('div'); gl.className = 'legend-group-label'; gl.textContent = label; legendList.appendChild(gl); }
     list.forEach(z => {
       const item = document.createElement('div');
       item.className = 'legend-item'; item.tabIndex = 0; item.setAttribute('role', 'button'); item.style.setProperty('--zc', z.color);
@@ -684,10 +730,12 @@
     });
   }
   const pick = keys => keys.map(k => ALL[k]);
-  buildLegendGroup('舞台與活動空間 · 節目表', STAGES);
-  buildLegendGroup('產業主題專區 Industry Theme EXPO', pick(['cx-01','cx-02','cx-03','cx-04','cx-05','cx-06','cx-07','cx-08','ep-01','ep-02','ep-03']));
-  buildLegendGroup('主題解方專區 Solutions', pick(['h','g','p','sig','e','f','s','m']));
-  buildLegendGroup('特色專區 Featured', pick(['t','gp']));
+  if (VIEW !== 'zone') buildLegendGroup(VIEW === 'stage' ? '' : '舞台與活動空間 · 節目表', STAGES);
+  if (VIEW !== 'stage') {
+    buildLegendGroup('產業主題專區 Industry Theme EXPO', pick(['cx-01','cx-02','cx-03','cx-04','cx-05','cx-06','cx-07','cx-08','ep-01','ep-02','ep-03']));
+    buildLegendGroup('主題解方專區 Solutions', pick(['h','g','p','sig','e','f','s','m']));
+    buildLegendGroup('特色專區 Featured', pick(['t','gp']));
+  }
 
   // ---------- Content rendering ----------
   function playAnim() { panelBody.classList.remove('playing'); void panelBody.offsetWidth; panelBody.classList.add('playing'); }
@@ -859,10 +907,10 @@
   let toastTimer = null;
   function toast(msg) { toastEl.textContent = msg; toastEl.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200); }
   async function shareMap(extraText = '', spotKey = '') {
-    const base = location.origin + location.pathname;
+    const base = location.origin + location.pathname + (VIEW === 'all' ? '' : `?view=${VIEW}`);
     const url = spotKey ? `${base}#spot=${spotKey}` : base;
-    const title = '2026 Meet Greater South 亞灣新創大南方 互動展區地圖';
-    const text = extraText || '快來探索展區介紹與舞台節目表!';
+    const title = '2026 Meet Greater South 亞灣新創大南方 ' + (VIEW === 'all' ? '互動展區地圖' : VIEWS[VIEW].title);
+    const text = extraText || (VIEW === 'all' ? '快來探索展區介紹與舞台節目表!' : VIEWS[VIEW].share);
     if (window.liff && liff.isInClient && liff.isInClient()) { try { await liff.shareTargetPicker([{ type:'text', text:`${title}\n${text}\n${url}` }]); return; } catch (err) {} }
     if (navigator.share) { try { await navigator.share({ title, text, url }); return; } catch (err) { return; } }
     try { await navigator.clipboard.writeText(`${title} ${url}`); toast('連結已複製到剪貼簿'); } catch (err) { prompt('複製此連結分享:', url); }
@@ -890,7 +938,8 @@
 
   // default: open 日光舞台 (or deep-linked spot)
   const initKey = (location.hash.match(/spot=([a-z0-9-]+)/) || [])[1];
-  openSpot((initKey && ALL[initKey]) ? initKey : 'sunrise');
+  const homeKey = VIEW === 'all' ? 'sunrise' : VIEWS[VIEW].home;
+  openSpot((initKey && ALL[initKey] && inView(ALL[initKey])) ? initKey : homeKey);
 
   window.addEventListener('load', () => {
     if (window.liff) { const liffId = (document.documentElement.dataset.liffId || '').trim(); if (liffId) liff.init({ liffId }).catch(err => console.warn('LIFF init failed', err)); }
