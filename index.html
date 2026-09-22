@@ -15,7 +15,24 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="大會地圖縮圖">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="alternate" hreflang="ja" href="https://funtekco.github.io/meet-greater-south-2026/ja/">
 <link rel="preload" as="image" href="assets/map-base.webp?v=0820" fetchpriority="high">
+<script>
+  // ---------- 語言:?lang=ja 切成日文版 ----------
+  // 網址參數優先,其次是上次按語言鈕記住的偏好(LINE 圖文選單的 stage/ zone/ 連結不帶參數,
+  // 靠這個維持日文)。日文字典 i18n/ja.js 只在需要時才以 document.write 同步插入,
+  // 主程式跑到時字典一定已就緒;沒有參數也沒有偏好時維持中文,行為完全不變。
+  (function () {
+    var q = (new URLSearchParams(location.search).get('lang') || '').toLowerCase();
+    var saved = ''; try { saved = localStorage.getItem('mgs-lang') || ''; } catch (e) {}
+    var lang = (q === 'ja' || q === 'zh') ? q : (saved === 'ja' ? 'ja' : 'zh');
+    window.MGS_LANG = lang;
+    if (lang === 'ja') {
+      document.documentElement.lang = 'ja';
+      document.write('<script src="i18n/ja.js?v=0922"><\/script>');
+    }
+  })();
+</script>
 
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -53,6 +70,10 @@
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
   }
+  /* 日文版:改用日文字體,漢字才會是日本字形而不是中文字形 */
+  html[lang="ja"] body {
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", "Meiryo", "Inter", sans-serif;
+  }
 
   /* ---------- Top brand bar ---------- */
   .brand-bar {
@@ -83,6 +104,7 @@
   }
   .icon-btn:hover, .icon-btn:focus-visible { background: var(--glass-strong); transform: translateY(-1px); outline: none; }
   .icon-btn svg { width: 18px; height: 18px; }
+  .lang-btn { width: auto; padding: 0 12px; font-size: 12px; font-weight: 800; letter-spacing: 0.5px; text-decoration: none; white-space: nowrap; }
 
   /* ---------- Hint pill ---------- */
   .hint {
@@ -356,6 +378,7 @@
     <span class="title">2026 互動展區地圖</span>
   </div>
   <nav class="brand-actions" aria-label="工具">
+    <a class="icon-btn lang-btn" id="btnLang" href="?lang=ja" aria-label="切換為日文版" hreflang="ja">日本語</a>
     <button class="icon-btn" id="btnLegend" aria-label="開啟展區與舞台總覽">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>
     </button>
@@ -454,6 +477,57 @@
   const SVGNS = 'http://www.w3.org/2000/svg';
   const VB = { w: 5025, h: 2363 };
   const DAYS = [ { key:'08/28', dow:'五' }, { key:'08/29', dow:'六' } ];
+
+  // ---------- 語言字串:中文為預設,日文由 i18n/ja.js(head 內依 ?lang=ja 載入)覆蓋 ----------
+  // 靜態 HTML 裡的中文不重複列在這裡,日文版啟動時直接改 DOM(見下方「日文版:靜態 HTML」區塊)。
+  // 字典缺哪個 key 就沿用中文,不會出現空白。
+  const LANG = window.MGS_LANG === 'ja' && window.I18N_JA ? 'ja' : 'zh';
+  const JA = LANG === 'ja' ? window.I18N_JA : null;
+  if (!JA) document.documentElement.lang = 'zh-Hant';   // 字典載入失敗時退回中文字體
+  const STR_ZH = {
+    langSwitch: '日本語', langSwitchAria: '切換為日文版',
+    dow: { '08/28': '星期五', '08/29': '星期六' },
+    views: {
+      stage: {
+        title: '舞台節目表',
+        doc: '舞台節目表 — 2026 Meet Greater South 亞灣新創大南方',
+        hint: '點地圖上的舞台看兩天節目表,右滑看位置放大圖',
+        legendTitle: '舞台與活動空間', legendSub: '點選任一舞台,即可在下方開啟兩天的節目表。',
+        share: '兩天的舞台節目表,點舞台就看得到!', otherLabel: '看展區與攤位名錄 ›'
+      },
+      zone: {
+        title: '展區與攤位名錄',
+        doc: '展區與攤位名錄 — 2026 Meet Greater South 亞灣新創大南方',
+        hint: '點展區看介紹與攤位名錄,右滑看放大地圖',
+        legendTitle: '展區總覽', legendSub: '點選任一展區,即可在下方開啟介紹與攤位名錄。',
+        share: '展區介紹與 244 家攤商名錄,點展區就看得到!', otherLabel: '看舞台節目表 ›'
+      }
+    },
+    spotAria: { stage: '查看節目表', zone: '查看展區介紹' },
+    spotGo: { stage: '節目表 ›', zone: '介紹 ›' },
+    legendGroups: { stages: '舞台與活動空間 · 節目表', theme: '產業主題專區 Industry Theme EXPO', solutions: '主題解方專區 Solutions', featured: '特色專區 Featured' },
+    legendTag: '節目表',
+    sessionLang: { '中文': '中文', 'EN': 'EN' },
+    schEmpty: '本日於此舞台無安排場次',
+    zoneInfo: '展區資訊',
+    boothHeading: '攤位名錄 · {n} 家參展商', boothHeadingMarket: '攤位名錄 · {n} 組市集攤商', boothTip: '點攤位看介紹',
+    boothAria: '查看攤商介紹',
+    eyebrowStage: '舞台與活動空間 · STAGE', eyebrowZone: '展區 · ZONE',
+    dotsStage: ['節目表', '位置圖'], dotsZone: ['展區介紹', '放大地圖'], dotsInit: ['資訊', '放大地圖'],
+    zoomAltOf: '{name} 位置放大圖',
+    shareTitleAll: '互動展區地圖', shareTextAll: '快來探索展區介紹與舞台節目表!',
+    toastCopied: '連結已複製到剪貼簿', promptCopy: '複製此連結分享:'
+  };
+  const deepMerge = (base, over) => {
+    const out = Object.assign({}, base);
+    Object.entries(over || {}).forEach(([k, v]) => {
+      const nested = v && typeof v === 'object' && !Array.isArray(v) && base[k] && typeof base[k] === 'object' && !Array.isArray(base[k]);
+      out[k] = nested ? deepMerge(base[k], v) : v;
+    });
+    return out;
+  };
+  const STR = JA ? deepMerge(STR_ZH, JA.ui) : STR_ZH;
+  const fmt = (tpl, vars) => String(tpl).replace(/\{(\w+)\}/g, (_, k) => (k in vars ? vars[k] : `{${k}}`));
 
   // ---------- Stages & activity spaces (clickable → schedule) ----------
   const STAGES = [
@@ -640,6 +714,24 @@
   STAGES.forEach(s => { s.type = 'stage'; ALL[s.key] = s; });
   ZONES.forEach(z => { z.type = 'zone'; ALL[z.key] = z; });
 
+  // ---------- 日文版:把字典套到資料上,對不到的項目維持中文 ----------
+  // 攤商以「展區 key + 中文顯示名稱」對回:攤位編號在主題館內不唯一(CX-02 有 21 家同編號),
+  // 名錄由 CSV 重生後順序也可能變,只有名稱穩定。nameEn 保留英文當副標,對照圖上的圖例。
+  if (JA) {
+    STAGES.forEach(s => { const t = (JA.stages || {})[s.key]; if (t && t.name) s.name = t.name; });
+    ZONES.forEach(z => {
+      const t = (JA.zones || {})[z.key]; if (!t) return;
+      if (t.name) z.name = t.name; if (t.blurb) z.blurb = t.blurb; if (t.highlights) z.highlights = t.highlights;
+    });
+    Object.values(SCHEDULE).forEach(days => Object.values(days).forEach(items => items.forEach(it => {
+      const t = (JA.schedule || {})[it.title]; if (t) it.title = t;
+    })));
+    Object.entries(BOOTHS).forEach(([k, list]) => {
+      const tz = (JA.booths || {})[k] || {};
+      list.forEach(b => { const t = tz[b[1]]; if (!t) return; if (t[0]) b[1] = t[0]; if (t[1]) b[2] = t[1]; });
+    });
+  }
+
   const $ = s => document.querySelector(s);
   const overlay = $('#overlay'), labelsEl = $('#labels'), mapFrame = $('#mapFrame');
   const panelBody = $('#panelBody');
@@ -651,31 +743,47 @@
   const carousel = $('#carousel'), carouselDots = $('#carouselDots'), zoneMapImg = $('#zoneMapImg'), zoneMore = $('#zoneMore');
   const legend = $('#legend'), legendList = $('#legendList'), toastEl = $('#toast');
 
+  // 日文版:靜態 HTML 裡的中文改成字典內容(中文版不動 DOM,HTML 原文即為中文)
+  if (JA) {
+    const setText = (sel, v) => { const el = $(sel); if (el && v) el.textContent = v; };
+    const setAttr = (sel, attr, v) => { const el = $(sel); if (el && v) el.setAttribute(attr, v); };
+    if (STR.docTitle) document.title = STR.docTitle;
+    setText('.brand-mark .title', STR.brandTitle);
+    setAttr('.brand-actions', 'aria-label', STR.navAria);
+    setAttr('#btnLegend', 'aria-label', STR.legendBtnAria);
+    setAttr('#btnShare', 'aria-label', STR.shareBtnAria);
+    setText('.hint .badge', STR.hintBadge); setText('#hintText', STR.hint);
+    setAttr('#mapFrame', 'aria-label', STR.mapFrameAria);
+    setAttr('.map-base', 'alt', STR.mapAlt);
+    setAttr('#overlay', 'aria-label', STR.overlayAria);
+    setAttr('#zoneMore', 'aria-label', STR.zoneMoreAria);
+    setAttr('#bdClose', 'aria-label', STR.bdCloseAria);
+    setAttr('#zoneMapImg', 'alt', STR.zoomAlt);
+    setText('#zoneSectionLabel', STR.zoneInfo);
+    setText('#legendTitle', STR.legendTitle); setText('#legend .sub', STR.legendSub); setText('#legendClose', STR.legendClose);
+  }
+
   // ---------- View scoping (?view=stage / ?view=zone) ----------
   // LINE 圖文選單要兩個不同網址:stage/ 與 zone/ 兩個子頁分別導到這裡並帶上對應的
   // ?view=,只保留該類別的可點區塊與清單。沒有這個參數時(既有的根網址)照舊顯示完整版。
+  // 文字都在 STR.views(中文)/ ja.ui.views(日文)。
   const VIEWS = {
-    stage: {
-      title: '舞台節目表',
-      doc: '舞台節目表 — 2026 Meet Greater South 亞灣新創大南方',
-      hint: '點地圖上的舞台看兩天節目表,右滑看位置放大圖',
-      legendTitle: '舞台與活動空間', legendSub: '點選任一舞台,即可在下方開啟兩天的節目表。',
-      share: '兩天的舞台節目表,點舞台就看得到!',
-      home: 'sunrise', other: 'zone', otherLabel: '看展區與攤位名錄 ›'
-    },
-    zone: {
-      title: '展區與攤位名錄',
-      doc: '展區與攤位名錄 — 2026 Meet Greater South 亞灣新創大南方',
-      hint: '點展區看介紹與攤位名錄,右滑看放大地圖',
-      legendTitle: '展區總覽', legendSub: '點選任一展區,即可在下方開啟介紹與攤位名錄。',
-      share: '展區介紹與 244 家攤商名錄,點展區就看得到!',
-      home: 'cx-01', other: 'stage', otherLabel: '看舞台節目表 ›'
-    }
+    stage: Object.assign({ home: 'sunrise', other: 'zone' }, STR.views.stage),
+    zone: Object.assign({ home: 'cx-01', other: 'stage' }, STR.views.zone)
   };
   const vParam = (new URLSearchParams(location.search).get('view') || '').toLowerCase();
   const VIEW = VIEWS[vParam] ? vParam : 'all';
   const inView = z => VIEW === 'all' || z.type === VIEW;
   document.body.dataset.view = VIEW;
+
+  // 組本頁網址:日文版的內部連結(切換模式、分享)都要帶 lang=ja,中文版維持原本乾淨的網址
+  function pageUrl(view, withOrigin = false) {
+    const p = new URLSearchParams();
+    if (view && view !== 'all') p.set('view', view);
+    if (LANG === 'ja') p.set('lang', 'ja');
+    const q = p.toString();
+    return (withOrigin ? location.origin : '') + location.pathname + (q ? '?' + q : '');
+  }
 
   if (VIEW !== 'all') {
     const v = VIEWS[VIEW];
@@ -685,8 +793,24 @@
     $('#legendTitle').textContent = v.legendTitle;
     $('#legend .sub').textContent = v.legendSub;
     const sw = $('#viewSwitch');
-    sw.textContent = v.otherLabel; sw.href = `?view=${v.other}`; sw.hidden = false;
+    sw.textContent = v.otherLabel; sw.href = pageUrl(v.other); sw.hidden = false;
   }
+
+  // ---------- 語言切換鈕:保留目前的 view 與 #spot,整頁重新載入 ----------
+  // 選過的語言記在 localStorage,之後從 LINE 圖文選單(不帶 lang 參數)進來也維持該語言。
+  // href 在每次 openSpot 後重算,讓「在新分頁開啟」也帶到當下的 #spot。
+  const btnLang = $('#btnLang'), toLang = LANG === 'ja' ? 'zh' : 'ja';
+  const langUrl = () => { const p = new URLSearchParams(location.search); p.set('lang', toLang); return location.pathname + '?' + p + location.hash; };
+  const syncLangHref = () => { btnLang.href = langUrl(); };
+  btnLang.textContent = STR.langSwitch;
+  btnLang.setAttribute('aria-label', STR.langSwitchAria);
+  btnLang.hreflang = toLang === 'ja' ? 'ja' : 'zh-Hant';
+  syncLangHref();
+  btnLang.addEventListener('click', e => {
+    e.preventDefault();
+    try { localStorage.setItem('mgs-lang', toLang); } catch (err) {}
+    location.href = langUrl();
+  });
 
   let current = null, currentDay = DAYS[0].key;
   const groups = {}, zlabels = {};
@@ -696,7 +820,7 @@
     const g = document.createElementNS(SVGNS, 'g');
     g.setAttribute('class', 'zone-group');
     g.dataset.zone = z.key; g.setAttribute('tabindex', '0'); g.setAttribute('role', 'button');
-    g.setAttribute('aria-label', `${z.name} ${z.nameEn},${z.type === 'stage' ? '查看節目表' : '查看展區介紹'}`);
+    g.setAttribute('aria-label', `${z.name} ${z.nameEn},${STR.spotAria[z.type]}`);
     g.style.setProperty('--zc', z.color);
     z.polys.forEach(pts => { const p = document.createElementNS(SVGNS, 'polygon'); p.setAttribute('class', 'hit'); p.setAttribute('points', pts); g.appendChild(p); });
     overlay.appendChild(g); groups[z.key] = g;
@@ -704,7 +828,7 @@
     const lab = document.createElement('div');
     lab.className = 'zlabel'; lab.style.setProperty('--zc', z.color);
     lab.style.left = (z.label.x / VB.w * 100) + '%'; lab.style.top = (z.label.y / VB.h * 100) + '%';
-    lab.innerHTML = `<span class="dot"></span>${z.code ? z.code + ' ' : ''}${z.name}<span class="go">${z.type === 'stage' ? '節目表 ›' : '介紹 ›'}</span>`;
+    lab.innerHTML = `<span class="dot"></span>${z.code ? z.code + ' ' : ''}${z.name}<span class="go">${STR.spotGo[z.type]}</span>`;
     labelsEl.appendChild(lab); zlabels[z.key] = lab;
 
     const enter = () => { if (current !== z.key) zlabels[z.key].classList.add('show'); };
@@ -722,7 +846,7 @@
       item.className = 'legend-item'; item.tabIndex = 0; item.setAttribute('role', 'button'); item.style.setProperty('--zc', z.color);
       item.innerHTML = `<span class="legend-swatch" style="background:${z.color}; color:${z.color};"></span>` +
         `<div><div class="legend-name">${z.code ? z.code + '｜' : ''}${z.name}</div><div class="legend-desc">${z.nameEn}</div></div>` +
-        (z.type === 'stage' ? '<span class="legend-tag">節目表</span>' : '');
+        (z.type === 'stage' ? `<span class="legend-tag">${STR.legendTag}</span>` : '');
       const open = () => { legend.dataset.open = 'false'; openSpot(z.key); };
       item.addEventListener('click', open);
       item.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
@@ -730,23 +854,23 @@
     });
   }
   const pick = keys => keys.map(k => ALL[k]);
-  if (VIEW !== 'zone') buildLegendGroup(VIEW === 'stage' ? '' : '舞台與活動空間 · 節目表', STAGES);
+  if (VIEW !== 'zone') buildLegendGroup(VIEW === 'stage' ? '' : STR.legendGroups.stages, STAGES);
   if (VIEW !== 'stage') {
-    buildLegendGroup('產業主題專區 Industry Theme EXPO', pick(['cx-01','cx-02','cx-03','cx-04','cx-05','cx-06','cx-07','cx-08','ep-01','ep-02','ep-03']));
-    buildLegendGroup('主題解方專區 Solutions', pick(['h','g','p','sig','e','f','s','m']));
-    buildLegendGroup('特色專區 Featured', pick(['t','gp']));
+    buildLegendGroup(STR.legendGroups.theme, pick(['cx-01','cx-02','cx-03','cx-04','cx-05','cx-06','cx-07','cx-08','ep-01','ep-02','ep-03']));
+    buildLegendGroup(STR.legendGroups.solutions, pick(['h','g','p','sig','e','f','s','m']));
+    buildLegendGroup(STR.legendGroups.featured, pick(['t','gp']));
   }
 
   // ---------- Content rendering ----------
   function playAnim() { panelBody.classList.remove('playing'); void panelBody.offsetWidth; panelBody.classList.add('playing'); }
-  const langTags = arr => (arr || []).map(l => `<span class="lang ${l === 'EN' ? 'en' : 'zh'}">${l}</span>`).join('');
+  const langTags = arr => (arr || []).map(l => `<span class="lang ${l === 'EN' ? 'en' : 'zh'}">${STR.sessionLang[l] || l}</span>`).join('');
 
   function renderDayTabs(z) {
     dayTabs.innerHTML = '';
     DAYS.forEach(d => {
       const b = document.createElement('button');
       b.className = 'day-tab' + (d.key === currentDay ? ' active' : ''); b.dataset.day = d.key;
-      b.innerHTML = `${d.key}<span class="dow">星期${d.dow}</span>`;
+      b.innerHTML = `${d.key}<span class="dow">${STR.dow[d.key] || '星期' + d.dow}</span>`;
       b.addEventListener('click', () => { currentDay = d.key; renderSchedule(z); refreshTabs(); });
       dayTabs.appendChild(b);
     });
@@ -755,7 +879,7 @@
   function renderSchedule(z) {
     const items = (SCHEDULE[z.key] && SCHEDULE[z.key][currentDay]) || [];
     scheduleList.innerHTML = '';
-    if (!items.length) { scheduleList.innerHTML = '<div class="sch-empty">本日於此舞台無安排場次</div>'; return; }
+    if (!items.length) { scheduleList.innerHTML = `<div class="sch-empty">${STR.schEmpty}</div>`; return; }
     items.forEach(it => {
       const el = document.createElement('div'); el.className = 'sch-item';
       el.innerHTML = `<div class="sch-time">${it.t}</div><div class="sch-main">` +
@@ -801,7 +925,7 @@
     boothGrid.querySelectorAll('.booth-chip').forEach(b => b.remove());
     if (!list.length) {
       // 主辦單位未提供名錄(CX-08)→ 退回原本的展區資訊條列
-      zoneSectionLabel.textContent = '展區資訊';
+      zoneSectionLabel.textContent = STR.zoneInfo;
       boothGrid.hidden = true; sheetHighlights.hidden = false;
       sheetHighlights.innerHTML = '';
       (z.highlights || []).forEach(h => {
@@ -812,9 +936,9 @@
       return;
     }
     sheetHighlights.hidden = true; boothGrid.hidden = false;
-    const unit = z.key === 't' ? '組市集攤商' : '家參展商';
+    const heading = z.key === 't' ? STR.boothHeadingMarket : STR.boothHeading;   // 市集用「組」,其餘「家」
     zoneSectionLabel.innerHTML =
-      `攤位名錄 · <span class="count">${list.length}</span> ${unit}<span class="tip">點攤位看介紹</span>`;
+      fmt(heading, { n: `<span class="count">${list.length}</span>` }) + `<span class="tip">${STR.boothTip}</span>`;
     list.forEach(([code, name, desc]) => {
       const b = document.createElement('button');
       b.className = 'booth-chip'; b.type = 'button';
@@ -823,7 +947,7 @@
                     '<span class="b-code"></span><span class="b-name"></span></span>';
       b.querySelector('.b-code').textContent = code;
       setLines(b.querySelector('.b-name'), name);
-      b.setAttribute('aria-label', `${code} ${name.replace(/\n/g, ' ')},查看攤商介紹`);
+      b.setAttribute('aria-label', `${code} ${name.replace(/\n/g, ' ')},${STR.boothAria}`);
       b.addEventListener('click', () => toggleBoothDetail(b, code, name, desc));
       boothGrid.appendChild(b);
     });
@@ -847,23 +971,24 @@
 
     if (z.type === 'stage') {
       document.body.dataset.mode = 'stage';
-      sheetEyebrow.textContent = '舞台與活動空間 · STAGE';
+      sheetEyebrow.textContent = STR.eyebrowStage;
       currentDay = firstDayWithSessions(key);
       renderDayTabs(z); renderSchedule(z);
-      setDotLabels(['節目表', '位置圖']);
+      setDotLabels(STR.dotsStage);
     } else {
       document.body.dataset.mode = 'zone';
-      sheetEyebrow.textContent = '展區 · ZONE';
+      sheetEyebrow.textContent = STR.eyebrowZone;
       sheetBlurb.textContent = z.blurb;
       renderBooths(z);
-      setDotLabels(['展區介紹', '放大地圖']);
+      setDotLabels(STR.dotsZone);
     }
     zoneMapImg.src = `assets/zone-${key}.webp?v=0820`;
-    zoneMapImg.alt = `${z.name} 位置放大圖`;
+    zoneMapImg.alt = fmt(STR.zoomAltOf, { name: z.name });
     jumpToPage(0); markDots(0);
     requestAnimationFrame(() => { jumpToPage(0); updateDots(); });
     playAnim();
     if (replace) history.replaceState({ spot: key }, '', '#spot=' + key);
+    syncLangHref();
   }
 
   // ---------- 2-page carousel (info + zoomed map) ----------
@@ -879,7 +1004,7 @@
     zoneMore.classList.toggle('off', idx !== 0);
   }
   function updateDots() { markDots(Math.round(carousel.scrollLeft / Math.max(1, carousel.clientWidth))); }
-  ['資訊', '放大地圖'].forEach((lbl, i) => {
+  STR.dotsInit.forEach((lbl, i) => {
     const d = document.createElement('button'); d.className = 'cdot' + (i === 0 ? ' active' : '');
     d.setAttribute('aria-label', lbl);
     d.addEventListener('click', () => scrollToPage(i));
@@ -907,13 +1032,13 @@
   let toastTimer = null;
   function toast(msg) { toastEl.textContent = msg; toastEl.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200); }
   async function shareMap(extraText = '', spotKey = '') {
-    const base = location.origin + location.pathname + (VIEW === 'all' ? '' : `?view=${VIEW}`);
+    const base = pageUrl(VIEW, true);
     const url = spotKey ? `${base}#spot=${spotKey}` : base;
-    const title = '2026 Meet Greater South 亞灣新創大南方 ' + (VIEW === 'all' ? '互動展區地圖' : VIEWS[VIEW].title);
-    const text = extraText || (VIEW === 'all' ? '快來探索展區介紹與舞台節目表!' : VIEWS[VIEW].share);
+    const title = '2026 Meet Greater South 亞灣新創大南方 ' + (VIEW === 'all' ? STR.shareTitleAll : VIEWS[VIEW].title);
+    const text = extraText || (VIEW === 'all' ? STR.shareTextAll : VIEWS[VIEW].share);
     if (window.liff && liff.isInClient && liff.isInClient()) { try { await liff.shareTargetPicker([{ type:'text', text:`${title}\n${text}\n${url}` }]); return; } catch (err) {} }
     if (navigator.share) { try { await navigator.share({ title, text, url }); return; } catch (err) { return; } }
-    try { await navigator.clipboard.writeText(`${title} ${url}`); toast('連結已複製到剪貼簿'); } catch (err) { prompt('複製此連結分享:', url); }
+    try { await navigator.clipboard.writeText(`${title} ${url}`); toast(STR.toastCopied); } catch (err) { prompt(STR.promptCopy, url); }
   }
   $('#btnShare').addEventListener('click', () => shareMap('', current || ''));
 
