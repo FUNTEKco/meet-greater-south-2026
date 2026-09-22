@@ -17,8 +17,9 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://funtekco.github.io/meet-greater-south-2026/stage/">
 <link rel="preload" as="image" href="../assets/map-base.webp?v=0820" fetchpriority="high">
-<!-- 這頁只負責導向:內容本體是根目錄的 index.html,用 ?view=stage 切成單一模式。 -->
-<script>location.replace('../?view=stage' + location.hash);</script>
+<!-- 這頁只負責導向:內容本體是根目錄的 index.html,用 ?view=stage 切成單一模式。
+     其他參數(例:?lang=ja 日文版)與 #spot= 原樣帶過去。 -->
+<script>(function () { var p = new URLSearchParams(location.search); p.set('view', 'stage'); location.replace('../?' + p + location.hash); })();</script>
 <meta http-equiv="refresh" content="0; url=../?view=stage">
 <style>
   html, body { height: 100%; margin: 0; }
